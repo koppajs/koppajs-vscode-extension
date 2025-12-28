@@ -1,0 +1,79 @@
+{
+  "name": "KPA",
+  "fileTypes": ["kpa"],
+  "scopeName": "source.kpa",
+  "patterns": [
+    {
+      "name": "meta.html.kpa",
+      "begin": "\\[html\\]",
+      "end": "\\[/html\\]",
+      "contentName": "text.html.basic",
+      "patterns": [
+        { "include": "text.html.basic" }
+      ]
+    },
+    {
+      "name": "meta.html.kpa",
+      "begin": "\\[tpl\\]",
+      "end": "\\[/tpl\\]",
+      "contentName": "text.html.basic",
+      "patterns": [
+        { "include": "text.html.basic" }
+      ]
+    },
+    {
+      "name": "meta.html.kpa",
+      "begin": "\\[template\\]",
+      "end": "\\[/template\\]",
+      "contentName": "text.html.basic",
+      "patterns": [
+        { "include": "text.html.basic" }
+      ]
+    },
+    {
+      "name": "meta.js.kpa",
+      "begin": "\\[js\\]",
+      "end": "\\[/js\\]",
+      "contentName": "source.js",
+      "patterns": [
+        { "include": "source.js" }
+      ]
+    },
+    {
+      "name": "meta.ts.kpa",
+      "begin": "\\[ts\\]",
+      "end": "\\[/ts\\]",
+      "contentName": "source.ts",
+      "patterns": [
+        { "include": "source.ts" }
+      ]
+    },
+    {
+      "name": "meta.css.kpa",
+      "begin": "\\[css\\]",
+      "end": "\\[/css\\]",
+      "contentName": "source.css",
+      "patterns": [
+        { "include": "source.css" }
+      ]
+    },
+    {
+      "name": "meta.scss.kpa",
+      "begin": "\\[scss\\]",
+      "end": "\\[/scss\\]",
+      "contentName": "source.css.scss",
+      "patterns": [
+        { "include": "source.css.scss" }
+      ]
+    },
+    {
+      "name": "meta.scss.kpa",
+      "begin": "\\[sass\\]",
+      "end": "\\[/sass\\]",
+      "contentName": "source.css.scss",
+      "patterns": [
+        { "include": "source.css.scss" }
+      ]
+    }
+  ]
+}

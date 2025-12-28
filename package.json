@@ -1,0 +1,97 @@
+{
+  "name": "koppajs-vscode-extension",
+  "displayName": "Koppajs VS-Code Extension",
+  "description": "Koppajs VS-Code Extension: An extension designed for enhanced support of .kpa files in Visual Studio Code. Offers syntax highlighting similar to HTML and supports embedded content such as JS, TS, CSS, SCSS, and SASS.",
+  "keywords": [
+    "koppa",
+    "koppajs",
+    "koppa.js",
+    "frontend",
+    "framework",
+    "ui-framework",
+    "typescript",
+    "vite",
+    "reactivity",
+    "single-file-components",
+    "modular",
+    "lightweight",
+    "high-performance",
+    "web-development",
+    "javascript"
+  ],
+  "author": "Bastian Bensch",
+  "license": "Apache-2.0",
+  "homepage": "https://koppajs.org",
+  "publisher": "koppajs",
+  "version": "0.0.2",
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/koppajs/koppajs-vscode-extension"
+  },
+  "engines": {
+    "vscode": "^1.82.0"
+  },
+  "categories": [
+    "Other",
+    "Programming Languages"
+  ],
+  "activationEvents": [],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "languages": [
+      {
+        "id": "kpa",
+        "extensions": [
+          ".kpa"
+        ],
+        "aliases": [
+          "KPA",
+          "kpa"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "kpa",
+        "scopeName": "source.kpa",
+        "path": "./syntaxes/kpa.tmLanguage.json"
+      }
+    ],
+    "embeddedLanguages": {
+      "text.html.basic": "html",
+      "source.js": "javascript",
+      "source.css": "css",
+      "source.ts": "typescript",
+      "source.sass": "sass",
+      "source.scss": "scss"
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run package",
+    "compile": "webpack",
+    "watch": "webpack --watch",
+    "package": "webpack --mode production --devtool hidden-source-map",
+    "compile-tests": "tsc -p . --outDir out",
+    "watch-tests": "tsc -p . -w --outDir out",
+    "pretest": "npm run compile-tests && npm run compile && npm run lint",
+    "lint": "eslint src --ext ts",
+    "test": "vscode-test",
+    "list-structure": "git ls-files > ---project-structure",
+    "dump-code": "node scripts/dump-code.js",
+    "analyze-code": "node scripts/analyze-code.js"
+  },
+  "devDependencies": {
+    "@types/mocha": "^10.0.6",
+    "@types/node": "18.x",
+    "@types/vscode": "^1.82.0",
+    "@typescript-eslint/eslint-plugin": "^7.4.0",
+    "@typescript-eslint/parser": "^7.4.0",
+    "eslint": "^8.57.0",
+    "ts-loader": "^9.5.1",
+    "typescript": "^5.3.3",
+    "webpack": "^5.91.0",
+    "webpack-cli": "^5.1.4"
+  }
+}

@@ -1,0 +1,339 @@
+[template]
+<div class="top-bar box-shadow" ref="top-bar">
+    <div class="logo">
+        <a href="#">
+            <img src="/images/logo.png" alt="Logo" /> 
+        </a>
+    </div>
+
+    <span class="spacer"></span>
+
+     <nav class="top-nav" ref="top-nav">
+        <ul>
+            <li><a href="/home">Home</a></li>
+            <li><a href="#">About</a></li>
+            <li><a href="#">Contact</a></li>
+            <li><a href="/imprint">Impressum</a></li>
+        </ul>
+     </nav>
+
+    <div class="toggle-nav">
+        <button id="menu-toggle" aria-label="Toggle menu" onClick="toggleMenu">
+            <!-- Hamburger Icon -->
+            <svg id="menu-icon" ref="menu-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke="#2c4143" stroke-linecap="round" stroke-linejoin="round" class="feather feather-menu">
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+            <!-- Close Icon (initially hidden) -->
+            <svg id="close-icon" ref="close-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke="#2c4143" stroke-linecap="round" stroke-linejoin="round" class="feather feather-x" style="display:none;">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+        </button>
+    </div>
+</div>
+     
+<nav class="side-nav box-shadow" ref="side-nav">
+    <div class="blur"></div>
+    <ul>
+        <li><a href="/home">Home</a></li>
+        <li><a href="#">About</a></li>
+        <li><a href="#">Contact</a></li>
+        <li><a href="/imprint">Impressum</a></li>
+    </ul>
+    <div onClick="closeMenu"></div>
+</nav>
+[/template]
+
+[ts]
+    return {
+        data: {},
+        methods: {
+            toggleMenu(event) {
+                const menuIcon = $refs['menu-icon'];
+                const closeIcon = $refs['close-icon'];
+                const sideNav = $refs['side-nav'];
+
+                // Toggle the 'show' class on the nav element
+                sideNav.classList.toggle('show');
+
+                // Show or hide the menu and close icons based on the presence of the 'show' class
+                if (sideNav.classList.contains('show')) {
+                    menuIcon.style.display = 'none';
+                    closeIcon.style.display = 'block';
+                } else {
+                    menuIcon.style.display = 'block';
+                    closeIcon.style.display = 'none';
+                }
+            },
+
+            closeMenu(event) {
+                const menuIcon = $refs['menu-icon'];
+                const closeIcon = $refs['close-icon'];
+                const sideNav = $refs['side-nav'];
+
+                // Remove the 'show' class from the nav element
+                sideNav.classList.remove('show');
+
+                // Show the menu icon and hide the close icon
+                menuIcon.style.display = 'block';
+                closeIcon.style.display = 'none';
+            },
+
+            toggleActive(href) {
+                [$refs['top-nav'], $refs['side-nav']].forEach(nav => {
+                    nav.querySelectorAll('a').forEach(link => {
+                        if (link.getAttribute('href') === href) {
+                            link.classList.add('active');
+                        } else {
+                            link.classList.remove('active');
+                        }
+                    });
+                });
+            }
+        },
+
+        mounted() {
+            this.toggleActive(window.location.pathname);
+        },
+
+        events: [
+            ['click', 'nav.side-nav a', function(event) {
+                event.preventDefault();
+                this.closeMenu(event);
+                router.navigate(event.target.getAttribute('href'));
+            }],
+            ['click', 'top-bar nav.top-nav a', function(event) {
+                event.preventDefault();
+                router.navigate(event.target.getAttribute('href'));
+            }],
+            ['popstate', window, function(event) {
+                this.toggleActive(window.location.pathname);
+            }]
+        ]
+    }
+[/ts]
+
+[scss]
+    top-bar {
+        .top-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            display: flex;
+            flex-flow: row nowrap;
+            height: 64px;
+
+            padding: 0 16px;
+
+            background-color: rgba(255, 255, 255, 1);
+
+            z-index: 100;
+
+            border-bottom: 3px solid #64c16c;
+
+            div {
+                padding: 8px 0;
+            }
+
+            .logo {
+                height: 40px;
+                width: 178px;
+
+                margin: 10.5px 12px 10.5px 8px;
+                padding: 0;
+
+                overflow: hidden;
+
+                a {
+                    display: block;
+                    width: inherit;
+                    height: inherit;
+                    overflow: hidden;
+                }
+
+                img {
+                    height: 148%;
+                }
+            }
+
+            nav {
+                ul {
+                    display: flex;
+                    flex-flow: row nowrap;
+
+                    padding: 16px 12px;
+                    margin: 0;
+
+                    li {
+                        list-style-type: none;
+                        padding: 0 16px;
+
+                        a {
+                            display: block;
+                            height: 32px;
+                            text-decoration: none;
+                            color: #2e4345;
+
+                            line-height: 32px;
+                        }
+
+                        a:hover, a.active {
+                            text-decoration: none;
+                            color: #64c16c;
+                        }
+                    }
+
+                    li:last-of-type {
+                        padding: 0 0 0 16px;
+                    }
+                }
+
+                ul + div {
+                    display: none;
+                }
+            }
+
+            .spacer {
+                flex-grow: 1;
+            }
+
+            .toggle-nav {
+                display: none;
+                align-self: flex-end;
+
+                button {
+                    width: 48px;
+                    height: 48px;
+                    border: 0;
+                    color: black;
+                    background-color: transparent;
+                    padding: 12px;
+
+                    cursor: pointer;
+                }
+            }
+
+            @media (max-width: 992px) {
+                nav.top-nav {
+                    display: none;
+                }
+                
+                .toggle-nav {
+                    display: block;
+                }
+            }
+        }
+
+        @media (max-width: 992px) {
+            .top-bar {
+                position: fixed;
+                top: 0;
+                background-color: rgba(255, 255, 255, 1);
+            }
+
+            nav.side-nav {
+                display: block;
+                position: fixed;
+                top: 64px;
+                left: 0;
+                width: 0;
+                height: calc(100vh - 64px);
+
+                transition: width 0s linear 0.5s, background-color 0.5s ease-in-out;
+
+                z-index: 10;
+
+                ul {
+                    display: flex;
+                    gap: 16px;
+
+                    padding: 16px;
+                    margin: 0;
+
+                    flex-flow: column nowrap;
+                    position: absolute;
+                    top: 0;
+                    left: -310px;
+                    width: 300px;
+                    height: 100%;
+
+                    transform: translateX(0);
+
+                    background-color: rgba(255, 255, 255, 1);
+
+                    transition: transform 0.2s ease-in-out 0s;
+
+                    z-index: 2;
+
+                    li {
+                    list-style-type: none;
+
+                    a {
+                        display: block;
+                        height: 32px;
+                        text-decoration: none;
+                        color: black;
+
+                        padding: 0 8px;
+
+                        line-height: 32px;
+                    }
+
+                    a.active {
+                        text-decoration: none;
+                        color: #64c16c;
+                    }
+                }
+                }
+
+                .blur {
+                    backdrop-filter: blur(0);
+                    transition: left 0.2s ease-in-out 0s, backdrop-filter 0.4s ease-in-out 0s;
+                }
+
+                ul + div {
+                    display: block;
+                    position: absolute;
+                    top: 0;
+                    right: 0;
+                    bottom: 0;
+                    left: 0;
+                    z-index: 1;
+                    background-color: rgba(0, 0, 0, 0);
+                    transition: left 0.2s ease-in-out 0s, background-color 0.4s ease-in-out 0s;
+                }
+            }
+
+            nav.side-nav.show {
+                width: 100%;
+                backround-position: 300px 300px;
+                transition: width 0s linear 0s;
+
+                ul {
+                    transform: translateX(310px);
+                    transition: transform 0.3s ease-in-out 0s;
+                }
+
+                .blur {
+                    backdrop-filter: blur(10px);
+                    transition: left 0.3s ease-in-out 0s, backdrop-filter 0.5s ease-in-out 0s;
+                }
+
+                ul + div {
+                    left: 300px;
+                    background-color: rgba(0, 0, 0, 0.4);
+                    transition: left 0.3s ease-in-out 0s, background-color 0.5s ease-in-out 0s;
+                }
+            }
+        }
+
+        @media (min-width: 993px) {
+            nav.side-nav {
+                display: none;
+            }
+        }
+    }
+[/scss]
