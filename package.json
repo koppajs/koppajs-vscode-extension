@@ -78,9 +78,7 @@
     "pretest": "npm run compile-tests && npm run compile && npm run lint",
     "lint": "eslint src --ext ts",
     "test": "vscode-test",
-    "list-structure": "git ls-files > ---project-structure",
-    "dump-code": "node scripts/dump-code.js",
-    "analyze-code": "node scripts/analyze-code.js"
+    "dump:ai": "node scripts/project-dump.mjs"
   },
   "devDependencies": {
     "@types/mocha": "^10.0.6",
