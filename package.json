@@ -1,7 +1,7 @@
 {
   "name": "koppajs-vscode-extension",
-  "displayName": "Koppajs VS-Code Extension",
-  "description": "Koppajs VS-Code Extension: An extension designed for enhanced support of .kpa files in Visual Studio Code. Offers syntax highlighting similar to HTML and supports embedded content such as JS, TS, CSS, SCSS, and SASS.",
+  "displayName": "KoppaJS VS-Code Extension",
+  "description": "KoppaJS VS-Code Extension: An extension designed for enhanced support of .kpa files in Visual Studio Code. Offers syntax highlighting similar to HTML and supports embedded content such as JS, TS, CSS, SCSS, and SASS.",
   "keywords": [
     "koppa",
     "koppajs",
