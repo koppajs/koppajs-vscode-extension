@@ -30,16 +30,17 @@ Current repository behavior:
 
 - syntax highlighting
 - an internal parser-backed document model for `.kpa` block structure
+- an internal local symbol extractor for top-level `[ts]` and `[js]` bindings
 - static block snippets
 - static HTML tag and attribute completions inside canonical `[template]`
 - structural canonical-block diagnostics
 
 Missing:
 
-- symbol model
+- a symbol model beyond local file scope
 - type model
 - cross-file analysis
-- semantic understanding of embedded TS/JS
+- deep semantic understanding of embedded TS/JS
 - editor features built on reusable language truth
 
 ### Level 1: Parsed Document Intelligence
@@ -177,6 +178,11 @@ Output of this step:
 
 - local template completions for script-defined names
 - basic hover for local bindings
+
+Current status:
+
+- a first internal local symbol extractor exists for top-level `[ts]` and `[js]` bindings
+- script-to-template visibility is currently modeled only at the local file level
 
 ### Step 3: Virtual Files and TS Bridge
 

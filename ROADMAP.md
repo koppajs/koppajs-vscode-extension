@@ -20,6 +20,7 @@ As of this repository state, KoppaJS has:
 
 - a VS Code extension with grammar support
 - an internal parser-backed `.kpa` document model inside this repository
+- an internal local symbol extractor for `[ts]` and `[js]` blocks
 - top-level block snippets
 - HTML tag and attribute completion inside canonical `[template]`
 - lightweight structural diagnostics for canonical blocks
@@ -70,6 +71,7 @@ while keeping scope inside this repository until the interfaces stabilize.
 - `src/language/documentModel.ts`
 - `src/language/sourcePositions.ts`
 - `src/language/diagnosticsRules.ts`
+- `src/language/symbols.ts`
 
 These remain internal at Stage 1. Do not publish them as stable packages yet.
 
