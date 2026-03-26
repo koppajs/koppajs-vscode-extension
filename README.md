@@ -1,159 +1,107 @@
-<a id="readme-top"></a>
+# KoppaJS VS Code Extension
 
-<div align="center">
-  <img src="https://public-assets-1b57ca06-687a-4142-a525-0635f7649a5c.s3.eu-central-1.amazonaws.com/koppajs/koppajs-logo-text-900x226.png" width="500" alt="KoppaJS Logo">
-</div>
+## Purpose
 
-<br>
+`koppajs-vscode-extension` provides editor support for KoppaJS `.kpa` files in
+Visual Studio Code. It is an editor-integration package, not a KoppaJS runtime,
+compiler, or bundler.
 
-<div align="center">
-  <a href="https://github.com/koppajs/koppajs-vscode-extension/actions"><img src="https://img.shields.io/github/actions/workflow/status/koppajs/koppajs-vscode-extension/ci.yml?branch=main&style=flat-square" alt="CI Status"></a>
-  <a href="./LICENSE"><img src="https://img.shields.io/badge/license-Apache--2.0-blue?style=flat-square" alt="License"></a>
-</div>
+## Repository Classification
 
-<br>
+- Type: VS Code extension plugin
+- Runtime responsibility: register `.kpa` language support, completions, and
+  structural diagnostics inside the VS Code host
+- Build-time responsibility: bundle the extension, compile integration tests,
+  and validate repository quality gates
+- UI surface: no standalone UI; the only product surface is the VS Code editor
+- Maturity: pre-1.0, narrow in scope, with explicit governance and specs
 
-<div align="center">
-  <h1 align="center">koppajs-vscode-extension</h1>
-  <h3 align="center">Official Visual Studio Code tooling for KoppaJS .kpa files</h3>
-  <p align="center">
-    <i>Syntax support, snippets, and structural diagnostics for the KoppaJS editing experience.</i>
-  </p>
-</div>
+## Ownership Boundaries
 
-<br>
+This repository owns:
 
-<div align="center">
-  <p align="center">
-    <a href="https://github.com/koppajs/koppajs-documentation">Documentation</a>
-    &middot;
-    <a href="https://github.com/koppajs/koppajs-core">KoppaJS Core</a>
-    &middot;
-    <a href="https://github.com/koppajs/koppajs-vite-plugin">Vite Plugin</a>
-    &middot;
-    <a href="https://github.com/koppajs/koppajs-vscode-extension/issues">Issues</a>
-  </p>
-</div>
+- `.kpa` language registration and grammar wiring
+- editor completions for KoppaJS block insertion
+- HTML tag and attribute completions in the canonical template block
+- warning diagnostics for malformed canonical block structure
 
-<br>
+This repository does not own:
 
-<details>
-<summary>Table of Contents</summary>
-  <ol>
-    <li><a href="#what-is-this-extension">What is this extension?</a></li>
-    <li><a href="#features">Features</a></li>
-    <li><a href="#supported-blocks">Supported Blocks</a></li>
-    <li><a href="#installation">Installation</a></li>
-    <li><a href="#usage">Usage</a></li>
-    <li><a href="#requirements">Requirements</a></li>
-    <li><a href="#architecture--governance">Architecture & Governance</a></li>
-    <li><a href="#community--contribution">Community & Contribution</a></li>
-    <li><a href="#license">License</a></li>
-  </ol>
-</details>
+- KoppaJS runtime execution
+- build output for `.kpa` applications
+- framework compilation or bundler integration
+- browser UI behavior outside the VS Code host
 
----
+## Public Contract
 
-## What is this extension?
+The supported editor contract is intentionally small:
 
-`koppajs-vscode-extension` is the official Visual Studio Code extension for the
-KoppaJS `.kpa` authoring format.
+- `.kpa` files are registered as the `kpa` language and activate the extension
+  through the explicit `onLanguage:kpa` activation event
+- top-level Koppa block snippets are offered only outside recognized structural
+  blocks
+- HTML tag completions are offered only inside the canonical `[template]` block
+  after `<`
+- HTML attribute completions are offered only while editing an opening HTML tag
+  inside `[template]`
+- warning diagnostics are emitted only for malformed canonical blocks
+  recognized by the diagnostics engine
 
-It focuses on editor support, not framework runtime behavior:
+Current block behavior:
 
-- syntax highlighting for `.kpa` blocks
-- snippets for common block patterns
-- HTML completions in the canonical template block
-- structural diagnostics for incorrectly opened or closed blocks
+- Canonical runtime blocks: `[template]`, `[ts]`, `[js]`, `[css]`, `[sass]`,
+  `[scss]`
+- Compatibility aliases: `[html]`, `[tpl]`
 
----
-
-## Features
-
-- syntax highlighting for KoppaJS blocks and embedded languages
-- snippets for common KoppaJS block structures
-- HTML tag and attribute completion inside the canonical `[template]` block
-- warnings for incomplete or mismatched canonical blocks
-
----
-
-## Supported Blocks
-
-Full editor support:
-
-- `[template]`
-- `[ts]`
-- `[js]`
-- `[css]`
-- `[sass]`
-- `[scss]`
-
-Grammar-compatible legacy HTML-like aliases:
-
-- `[html]`
-- `[tpl]`
-
-`[html]` and `[tpl]` are currently supported for syntax highlighting, but they
-are not treated as fully equivalent aliases for completions and diagnostics.
-
----
-
-## Installation
-
-There are two supported paths:
-
-1. Marketplace installation after a public release.
-2. Local `.vsix` packaging and installation for development or manual testing.
-
-Local packaging details live in [DEVELOPMENT_README.md](./DEVELOPMENT_README.md).
-
----
+`[html]` and `[tpl]` are structural compatibility aliases. They suppress
+top-level block insertion inside the alias block, but they do not receive
+template-specific HTML completions or runtime block diagnostics.
 
 ## Usage
 
-Open a `.kpa` file in Visual Studio Code.
-The extension activates automatically for the `kpa` language mode.
-
-Example:
+Open a `.kpa` file in Visual Studio Code and edit within the canonical block
+structure:
 
 ```plaintext
 [template]
-  <div>
-    <p>Hello Koppa!</p>
+  <div class="card">
+    <p>Hello KoppaJS</p>
   </div>
 [/template]
 
 [ts]
-  const msg: string = "Hello TypeScript in Koppa!";
-  console.log(msg);
+  const message = 'Hello TypeScript';
 [/ts]
 
 [css]
-  div {
+  .card {
     color: red;
   }
 [/css]
 ```
 
----
+## Installation
 
-## Requirements
+Supported paths:
 
-For users:
+1. Install from the VS Code Marketplace after a public release.
+2. Build and install a local `.vsix` for development or manual verification.
 
-- Visual Studio Code `^1.82.0`
+Local packaging details live in [DEVELOPMENT_README.md](./DEVELOPMENT_README.md).
 
-For local repository work:
+## Ecosystem Fit
 
-- the repo toolchain defined by `package.json`
-- a local install path capable of building and testing the extension bundle
+This extension complements the rest of the KoppaJS ecosystem:
 
----
+- KoppaJS core defines runtime semantics
+- KoppaJS build tooling owns compilation and bundler integration
+- this repository owns editor-time feedback and authoring ergonomics for `.kpa`
+  files
 
-## Architecture & Governance
+## Governance
 
-Architecture, testing, and contributor workflow documents live in the repo root
-and under `docs/`:
+The repository is governed through the root meta layer and supporting `docs/`
+directories:
 
 - [AI_CONSTITUTION.md](./AI_CONSTITUTION.md)
 - [ARCHITECTURE.md](./ARCHITECTURE.md)
@@ -161,23 +109,13 @@ and under `docs/`:
 - [DEVELOPMENT_RULES.md](./DEVELOPMENT_RULES.md)
 - [TESTING_STRATEGY.md](./TESTING_STRATEGY.md)
 - [ROADMAP.md](./ROADMAP.md)
+- [CONTRIBUTING.md](./CONTRIBUTING.md)
 - [DEVELOPMENT_README.md](./DEVELOPMENT_README.md)
-- [docs/meta/tooling-baseline.md](./docs/meta/tooling-baseline.md)
 - [docs/specs/kpa-editing-core.md](./docs/specs/kpa-editing-core.md)
-- [CODE_OF_CONDUCT.md](./CODE_OF_CONDUCT.md)
-
----
-
-## Community & Contribution
-
-Issues and pull requests are welcome:
-
-https://github.com/koppajs/koppajs-vscode-extension/issues
-
-Contributor workflow details live in [CONTRIBUTING.md](./CONTRIBUTING.md).
-
----
+- [docs/architecture/module-boundaries.md](./docs/architecture/module-boundaries.md)
+- [docs/quality/quality-gates.md](./docs/quality/quality-gates.md)
+- [docs/meta/README.md](./docs/meta/README.md)
 
 ## License
 
-Apache License 2.0 — © 2026 KoppaJS, Bastian Bensch
+Apache License 2.0. See [LICENSE](./LICENSE).

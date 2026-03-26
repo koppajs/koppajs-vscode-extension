@@ -6,4 +6,6 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ## [Unreleased]
 
-- Initial release
+- Made `.kpa` activation explicit through `onLanguage:kpa`.
+- Clarified canonical `[template]` behavior versus `[html]` and `[tpl]` compatibility aliases.
+- Fixed the optional repository-audit dump script so the default path runs without extra ZIP tooling.

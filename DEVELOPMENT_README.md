@@ -1,48 +1,114 @@
 # VS Code Koppa Extension Development Guide
 
-This guide will walk you through the process of packaging the VS Code Koppa Extension.
-
 ## Prerequisites
 
-1. Ensure you have Node.js and npm installed on your machine. If not, you can download and install it from [here](https://nodejs.org/).
+- Node.js `22` (see `.nvmrc`)
+- `npm`
 
-2. Make sure all project dependencies are installed:
+Install dependencies:
 
 ```bash
 npm install
 ```
 
-## Packaging the Extension
+`npm install` also wires the repository's Husky Git hook baseline.
 
-Follow these steps to package your extension:
+## Local Development
 
-1. Open a terminal in the root directory of your extension.
-
-2. Use the following command to package the extension:
+Compile the extension bundle:
 
 ```bash
-npx vsce package
+npm run compile
 ```
 
-&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
-Upon successful packaging, a `.vsix` file should be created in your project directory. This file represents your packaged extension.
+Watch for changes during development:
 
-## Installing the Packaged Extension in VS Code
+```bash
+npm run watch
+```
 
-To install the `.vsix` file in VS Code:
+Compile the VS Code integration test bundle:
+
+```bash
+npm run compile-tests
+```
+
+Run linting:
+
+```bash
+npm run lint
+```
+
+Run formatting checks:
+
+```bash
+npm run format:check
+```
+
+Run the full validation baseline:
+
+```bash
+npm run validate
+```
+
+## Running Tests
+
+Fast unit tests use Vitest:
+
+```bash
+npm run test:unit
+```
+
+Coverage currently targets the unit-testable helper layer:
+
+```bash
+npm run test:coverage
+```
+
+VS Code host integration tests use the VS Code test runner:
+
+```bash
+npm run test:integration
+```
+
+`npm test` runs both automated layers. `npm run test:watch` watches the unit suite.
+
+## Optional Repository Audit Utility
+
+Generate a repository dump for AI-assisted audits:
+
+```bash
+npm run dump:ai
+```
+
+The script writes outputs under `.local/`. ZIP creation remains optional and is
+skipped automatically when its extra dependency is unavailable.
+
+## Packaging
+
+Create the production extension bundle:
+
+```bash
+npm run package
+```
+
+If you want to build a `.vsix`, use the VS Code packaging tool explicitly:
+
+```bash
+npx @vscode/vsce package
+```
+
+## Installing a `.vsix`
 
 1. Open Visual Studio Code.
+2. Open the Extensions view.
+3. Open the Extensions view menu.
+4. Select `Install from VSIX...`.
+5. Choose the generated `.vsix` file.
 
-2. Press `Ctrl+Shift+X` (or `Cmd+Shift+X` on macOS) to open the Extensions pane.
+## Related Docs
 
-3. Click on the "More Actions" button (three vertical dots) at the top right corner of the Extensions pane.
-
-4. Select "Install from VSIX..." from the dropdown menu.
-
-5. Navigate to your project directory and select the `.vsix` file.
-
-6. After installation, you should see your extension listed among the installed extensions.
-
-## Notes
-
-If you make changes to your extension, you'll need to repeat these steps to package and install the latest version of your extension.
+- [CONTRIBUTING.md](./CONTRIBUTING.md)
+- [ARCHITECTURE.md](./ARCHITECTURE.md)
+- [TESTING_STRATEGY.md](./TESTING_STRATEGY.md)
+- [docs/meta/tooling-baseline.md](./docs/meta/tooling-baseline.md)

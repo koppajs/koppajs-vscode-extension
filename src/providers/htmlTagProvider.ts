@@ -1,8 +1,7 @@
-// src/providers/htmlTagProvider.ts
-
 import * as vscode from 'vscode';
-import { isCursorInSpecificBlock } from '../utils/blockUtils';
-import { htmlTags } from '../data/htmlTags'; // angenommen du hast htmlTags ausgelagert
+import { canonicalTemplateBlock } from '../data/kpaBlocks';
+import { htmlTags } from '../data/htmlTags';
+import { isOffsetInsideSpecificBlock } from '../utils/blockUtils';
 
 function createCompletionItem(label: string, snippet: string, documentation: string) {
   const item = new vscode.CompletionItem(label, vscode.CompletionItemKind.Snippet);
@@ -12,18 +11,23 @@ function createCompletionItem(label: string, snippet: string, documentation: str
 }
 
 export function registerHtmlTagProvider(context: vscode.ExtensionContext) {
-  const provider = vscode.languages.registerCompletionItemProvider('kpa', {
-    provideCompletionItems(document, position) {
-      // Nur in [template]
-      if (!isCursorInSpecificBlock(document, position, ['template'])) {
-        return undefined;
-      }
+  const provider = vscode.languages.registerCompletionItemProvider(
+    'kpa',
+    {
+      provideCompletionItems(document, position) {
+        if (
+          !isOffsetInsideSpecificBlock(document.getText(), document.offsetAt(position), [
+            canonicalTemplateBlock,
+          ])
+        ) {
+          return undefined;
+        }
 
-      return htmlTags.map(tag => createCompletionItem(tag.name, tag.pattern, tag.description));
+        return htmlTags.map((tag) => createCompletionItem(tag.name, tag.pattern, tag.description));
+      },
     },
-  },
-  '<'  // <-- Trigger-Character
-);
+    '<',
+  );
 
   context.subscriptions.push(provider);
 }
