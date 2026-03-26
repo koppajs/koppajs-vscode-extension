@@ -24,6 +24,8 @@ This repository owns:
 - editor completions for KoppaJS block insertion
 - HTML tag and attribute completions in the canonical template block
 - local script-symbol completions and hover in canonical template expressions
+- warning diagnostics for missing local template bindings in canonical template expressions
+- local go-to-definition and document symbols for parser-backed `.kpa` structure
 - warning diagnostics for malformed canonical block structure
 
 This repository does not own:
@@ -49,6 +51,10 @@ The supported editor contract is intentionally small:
   as completion items inside `{...}` expressions within canonical `[template]`
 - hover inside canonical template expressions can describe local
   template-visible bindings from `[ts]` and `[js]`
+- canonical template expressions can navigate to local `[ts]` and `[js]`
+  declarations via go-to-definition
+- document symbols expose parsed blocks and local top-level script bindings
+- simple missing local bindings inside canonical template expressions emit warning diagnostics
 - warning diagnostics are emitted only for malformed canonical blocks
   recognized by the diagnostics engine
 

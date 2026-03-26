@@ -22,6 +22,7 @@ As of this repository state, KoppaJS has:
 - an internal parser-backed `.kpa` document model inside this repository
 - an internal local symbol extractor for `[ts]` and `[js]` blocks
 - local template-symbol completions and hover for file-local `[ts]` and `[js]` bindings
+- local template missing-binding diagnostics, definitions, and document symbols for file-local bindings
 - top-level block snippets
 - HTML tag and attribute completion inside canonical `[template]`
 - lightweight structural diagnostics for canonical blocks

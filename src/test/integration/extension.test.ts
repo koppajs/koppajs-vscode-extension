@@ -54,6 +54,38 @@ suite('Extension integration', () => {
       .join('\n');
   }
 
+  function getDefinitionLines(
+    definitions: readonly (vscode.Location | vscode.LocationLink)[] | undefined,
+  ): number[] {
+    return (
+      definitions?.map((definition) =>
+        isLocationLink(definition)
+          ? (definition.targetSelectionRange ?? definition.targetRange).start.line
+          : definition.range.start.line,
+      ) ?? []
+    );
+  }
+
+  function flattenDocumentSymbolNames(
+    symbols: readonly (vscode.DocumentSymbol | vscode.SymbolInformation)[] | undefined,
+  ): string[] {
+    if (!symbols) {
+      return [];
+    }
+
+    return symbols.flatMap((symbol) =>
+      'children' in symbol
+        ? [symbol.name, ...flattenDocumentSymbolNames(symbol.children)]
+        : [symbol.name],
+    );
+  }
+
+  function isLocationLink(
+    definition: vscode.Location | vscode.LocationLink,
+  ): definition is vscode.LocationLink {
+    return 'targetUri' in definition;
+  }
+
   async function waitForKpaDiagnostics(
     document: vscode.TextDocument,
     expectedCount: number,
@@ -159,6 +191,19 @@ suite('Extension integration', () => {
     assert.ok(!labels.includes('Props'));
   });
 
+  test('publishes warning diagnostics for missing local template bindings', async () => {
+    const document = await vscode.workspace.openTextDocument({
+      content: '[template]\n  <div>{missing}</div>\n[/template]',
+      language: 'kpa',
+    });
+    await vscode.window.showTextDocument(document);
+
+    const diagnostics = await waitForKpaDiagnostics(document, 1);
+
+    assert.strictEqual(diagnostics.length, 1);
+    assert.ok(diagnostics[0].message.includes('Lokales Template-Symbol [missing]'));
+  });
+
   test('does not offer HTML attribute completions inside template expressions in opening tags', async () => {
     const document = await vscode.workspace.openTextDocument({
       content: [
@@ -187,6 +232,30 @@ suite('Extension integration', () => {
     assert.ok(!labels.includes('class'));
   });
 
+  test('resolves local script symbol definitions inside canonical template expressions', async () => {
+    const document = await vscode.workspace.openTextDocument({
+      content: [
+        '[template]',
+        '  <div>{count}</div>',
+        '[/template]',
+        '',
+        '[ts]',
+        '  const count = 1;',
+        '[/ts]',
+      ].join('\n'),
+      language: 'kpa',
+    });
+    await vscode.window.showTextDocument(document);
+    await waitForExtensionActivation();
+
+    const offset = document.getText().indexOf('{count}') + 2;
+    const definitions = await vscode.commands.executeCommand<
+      Array<vscode.Location | vscode.LocationLink>
+    >('vscode.executeDefinitionProvider', document.uri, document.positionAt(offset));
+
+    assert.deepStrictEqual(getDefinitionLines(definitions), [5]);
+  });
+
   test('does not offer canonical template completions inside compatibility alias blocks', async () => {
     const document = await vscode.workspace.openTextDocument({
       content: '[html]\n  <\n[/html]',
@@ -205,6 +274,34 @@ suite('Extension integration', () => {
     assert.ok(completions);
     assert.ok(!completions.items.some((item) => item.label === 'div'));
     assert.ok(!completions.items.some((item) => item.label === 'template'));
+  });
+
+  test('reports document symbols for blocks and local script symbols', async () => {
+    const document = await vscode.workspace.openTextDocument({
+      content: [
+        '[template]',
+        '  <div>{count}</div>',
+        '[/template]',
+        '',
+        '[ts]',
+        '  const count = 1;',
+        '  function increment() {}',
+        '[/ts]',
+      ].join('\n'),
+      language: 'kpa',
+    });
+    await vscode.window.showTextDocument(document);
+    await waitForExtensionActivation();
+
+    const symbols = await vscode.commands.executeCommand<
+      Array<vscode.DocumentSymbol | vscode.SymbolInformation>
+    >('vscode.executeDocumentSymbolProvider', document.uri);
+    const symbolNames = flattenDocumentSymbolNames(symbols);
+
+    assert.ok(symbolNames.includes('[template]'));
+    assert.ok(symbolNames.includes('[ts]'));
+    assert.ok(symbolNames.includes('count'));
+    assert.ok(symbolNames.includes('increment'));
   });
 
   test('provides hover information for local script symbols inside canonical template expressions', async () => {

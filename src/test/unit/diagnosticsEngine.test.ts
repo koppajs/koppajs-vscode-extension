@@ -5,11 +5,11 @@ describe('collectBlockDiagnostics', () => {
   it('returns no diagnostics for a well-formed document', () => {
     const text = [
       '[template]',
-      '  <div></div>',
+      '  <div>{count}</div>',
       '[/template]',
       '',
       '[ts]',
-      'const a = 1;',
+      'const count = 1;',
       '[/ts]',
     ].join('\n');
 
@@ -51,7 +51,7 @@ describe('collectBlockDiagnostics', () => {
   });
 
   it('ignores compatibility aliases until they are explicitly promoted to runtime diagnostics', () => {
-    const text = ['[html]', '<div></div>', '[/html]'].join('\n');
+    const text = ['[html]', '<div>{missing}</div>', '[/html]'].join('\n');
 
     expect(collectBlockDiagnostics(text)).toEqual([]);
   });
@@ -61,5 +61,38 @@ describe('collectBlockDiagnostics', () => {
     const [diagnostic] = collectBlockDiagnostics(text);
 
     expect(diagnostic?.message).toContain('ohne dass er vorher geoeffnet wurde');
+  });
+
+  it('flags missing local template symbols in simple canonical expressions', () => {
+    const text = ['[template]', '  <div>{missing}</div>', '[/template]'].join('\n');
+    const [diagnostic] = collectBlockDiagnostics(text);
+
+    expect(diagnostic?.message).toBe('Lokales Template-Symbol [missing] wurde nicht gefunden.');
+    expect(diagnostic?.range).toEqual({
+      line: 1,
+      startChar: 8,
+      endChar: 15,
+    });
+  });
+
+  it('ignores known local template symbols and known globals', () => {
+    const text = [
+      '[template]',
+      '  <div>{count}</div>',
+      '  <div>{Math}</div>',
+      '[/template]',
+      '',
+      '[ts]',
+      'const count = 1;',
+      '[/ts]',
+    ].join('\n');
+
+    expect(collectBlockDiagnostics(text)).toEqual([]);
+  });
+
+  it('avoids warning on compound expressions until expression-level semantic analysis is broader', () => {
+    const text = ['[template]', '  <div>{count + missing}</div>', '[/template]'].join('\n');
+
+    expect(collectBlockDiagnostics(text)).toEqual([]);
   });
 });

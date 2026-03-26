@@ -34,6 +34,7 @@ Current repository behavior:
 - static block snippets
 - static HTML tag and attribute completions inside canonical `[template]`
 - local symbol completions and hover inside canonical template expressions
+- local missing-binding diagnostics and definition/document-symbol features for file-local bindings
 - structural canonical-block diagnostics
 
 Missing:
@@ -184,6 +185,7 @@ Current status:
 
 - a first internal local symbol extractor exists for top-level `[ts]` and `[js]` bindings
 - local template completions and hover now consume file-local top-level `[ts]` and `[js]` bindings
+- local semantic diagnostics, go-to-definition, and document symbols now partially consume that same file-local symbol layer
 - script-to-template visibility is currently modeled only at the local file level
 
 ### Step 3: Virtual Files and TS Bridge

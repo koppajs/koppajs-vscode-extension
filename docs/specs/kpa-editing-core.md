@@ -6,15 +6,15 @@ Active
 
 ## Summary
 
-The extension provides a baseline editing experience for `.kpa` documents in VS Code: syntax highlighting, block insertion snippets, HTML-oriented completions inside the canonical template block, local script-symbol completions and hover inside canonical template expressions, and warning diagnostics for malformed canonical block structure.
+The extension provides a baseline editing experience for `.kpa` documents in VS Code: syntax highlighting, block insertion snippets, HTML-oriented completions inside the canonical template block, local script-symbol completions and hover inside canonical template expressions, warning diagnostics for malformed canonical blocks and missing local template bindings, local go-to-definition from canonical template expressions, and document symbols for blocks plus local script declarations.
 
 ## Description
 
 This spec defines the editor contract for `.kpa` authoring inside Visual Studio
 Code. It covers activation, structural block insertion, canonical
 template-oriented HTML completions, local script-symbol intelligence inside
-canonical template expressions, and warning diagnostics for malformed canonical
-blocks.
+canonical template expressions, parser-backed local navigation, and warning
+diagnostics for malformed canonical blocks plus missing local template bindings.
 
 ## Inputs
 
@@ -31,10 +31,13 @@ blocks.
 - HTML attribute completions while editing an opening HTML tag inside `[template]`
 - Local completion items for template-visible top-level bindings from `[ts]` and `[js]` while editing `{...}` expressions inside `[template]`
 - Hover details for template-visible local bindings referenced inside `{...}` expressions inside `[template]`
+- Go-to-definition targets for template-visible local bindings referenced inside `{...}` expressions inside `[template]`
+- Document symbols for parsed blocks plus local top-level bindings from `[ts]` and `[js]`
 - Warning diagnostics for canonical block issues:
   - closing block without a matching open block
   - mismatched closing block
   - unclosed canonical block at end of document
+- Warning diagnostics for missing local template-visible bindings in simple canonical `{...}` expressions
 
 ## Behavior
 
@@ -55,11 +58,17 @@ blocks.
    template expression can show local symbol details.
 8. Type-only imports, interfaces, and type aliases are excluded from canonical
    template expression completions and hover.
-9. `[html]` and `[tpl]` are treated as structural compatibility aliases only:
-   they suppress top-level block insertion inside the alias block, but they do
-   not receive template-specific HTML completions, local symbol intelligence,
-   or runtime block diagnostics.
-10. Diagnostics are emitted only for canonical runtime blocks handled by the
+9. Inside a canonical template expression, go-to-definition can navigate from a
+   local template-visible binding reference to its declaration in `[ts]` or `[js]`.
+10. Document symbols can expose parsed blocks and local top-level script symbols
+    for the current `.kpa` file.
+11. Missing local template-visible bindings in simple canonical `{...}`
+    expressions can produce warning diagnostics.
+12. `[html]` and `[tpl]` are treated as structural compatibility aliases only:
+    they suppress top-level block insertion inside the alias block, but they do
+    not receive template-specific HTML completions, local symbol intelligence,
+    parser-backed local navigation, or runtime block diagnostics.
+13. Diagnostics are emitted only for canonical runtime blocks handled by the
     diagnostics engine.
 
 ## Constraints
@@ -69,6 +78,8 @@ blocks.
 - Full template-intelligence support is canonical for `[template]`, not for all grammar aliases.
 - The extension currently relies on local static completion catalogs instead of remote or generated metadata.
 - Local script-symbol intelligence is limited to file-local top-level bindings from `[ts]` and `[js]`.
+- Local go-to-definition only resolves file-local template-visible bindings from `[ts]` and `[js]`.
+- Missing-binding diagnostics currently target only simple canonical `{...}` expressions whose root reference can be resolved conservatively.
 - The extension does not yet provide inferred types, cross-file symbol resolution, or semantic rename.
 
 ## Edge Cases
@@ -78,6 +89,7 @@ blocks.
 - Typing inside `[template]` but outside an opening HTML tag should not offer HTML attribute suggestions.
 - Typing inside a canonical template expression should not offer HTML tag or attribute completions just because the expression sits near markup.
 - Type-only imports and type-only declarations should not appear as canonical template expression completions.
+- Missing local template binding warnings should apply only to canonical `[template]`, not compatibility aliases.
 - A closing canonical block without an opener should produce a warning.
 - A canonical block left open at end of document should produce a warning.
 - `[html]` and `[tpl]` receive grammar support and structural suppression, but canonical template completions, local symbol intelligence, and diagnostics do not apply to them.
@@ -95,8 +107,13 @@ blocks.
    `[ts]` and `[js]` can appear as completion items.
 7. Hovering a local template-visible binding in a canonical template expression
    can show symbol details.
-8. Malformed canonical block structure produces warning diagnostics.
-9. Documentation explicitly distinguishes canonical behavior from compatibility aliases.
+8. Go-to-definition from a local template-visible binding in canonical
+   `{...}` expressions can navigate to its local script declaration.
+9. Document symbols expose parsed blocks and local top-level script bindings.
+10. Missing local template-visible bindings in simple canonical `{...}`
+    expressions produce warning diagnostics.
+11. Malformed canonical block structure produces warning diagnostics.
+12. Documentation explicitly distinguishes canonical behavior from compatibility aliases.
 
 ## Evolution
 
@@ -105,12 +122,15 @@ blocks.
 - `known_gaps`:
   - `[html]` and `[tpl]` still do not have diagnostics parity with `[template]`
   - local template symbol intelligence is file-local only and not type-aware
+  - missing-binding diagnostics are conservative and do not yet analyze compound expressions
   - grammar behavior is still verified partly through manual smoke checks
 - `deferred_complexity`:
   - fixture-driven integration scenarios for larger `.kpa` documents
   - cross-file component and symbol resolution
+  - rename and references beyond local declarations
   - generated HTML metadata instead of hand-maintained completion catalogs
 - `technical_debt_items`:
   - decide whether compatibility aliases should remain structural-only
   - decide the full script-to-template visibility contract for KoppaJS semantics
+  - decide whether template semantic diagnostics should expand beyond simple root-reference cases
   - reduce reliance on manual grammar verification where practical

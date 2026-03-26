@@ -1,15 +1,19 @@
 import * as vscode from 'vscode';
+import { registerDocumentSymbolProvider } from './providers/documentSymbolProvider';
 import { registerBlockProvider } from './providers/blockProvider';
 import { registerHtmlTagProvider } from './providers/htmlTagProvider';
 import { registerHtmlAttributeProvider } from './providers/htmlAttributeProvider';
+import { registerTemplateDefinitionProvider } from './providers/templateDefinitionProvider';
 import { registerTemplateExpressionCompletionProvider } from './providers/templateExpressionCompletionProvider';
 import { registerTemplateExpressionHoverProvider } from './providers/templateExpressionHoverProvider';
 import { updateDiagnostics, kpaDiagnosticCollection } from './diagnostics';
 
 export function activate(context: vscode.ExtensionContext) {
+  registerDocumentSymbolProvider(context);
   registerBlockProvider(context);
   registerHtmlTagProvider(context);
   registerHtmlAttributeProvider(context);
+  registerTemplateDefinitionProvider(context);
   registerTemplateExpressionCompletionProvider(context);
   registerTemplateExpressionHoverProvider(context);
 
