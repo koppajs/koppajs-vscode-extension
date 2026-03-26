@@ -25,6 +25,35 @@ suite('Extension integration', () => {
     assert.ok(extension.isActive, `Extension ${extensionId} should activate for kpa documents.`);
   }
 
+  function getCompletionLabels(completions: vscode.CompletionList | undefined): string[] {
+    return (
+      completions?.items.map((item) =>
+        typeof item.label === 'string' ? item.label : item.label.label,
+      ) ?? []
+    );
+  }
+
+  function getHoverText(hovers: readonly vscode.Hover[]): string {
+    return hovers
+      .flatMap((hover) => hover.contents)
+      .map((content) => {
+        if (typeof content === 'string') {
+          return content;
+        }
+
+        const normalizedContent = content as { language?: string; value?: string };
+
+        if (typeof normalizedContent.value !== 'string') {
+          return '';
+        }
+
+        return typeof normalizedContent.language === 'string'
+          ? `${normalizedContent.language}\n${normalizedContent.value}`
+          : normalizedContent.value;
+      })
+      .join('\n');
+  }
+
   async function waitForKpaDiagnostics(
     document: vscode.TextDocument,
     expectedCount: number,
@@ -99,6 +128,65 @@ suite('Extension integration', () => {
     assert.ok(completions.items.some((item) => item.label === 'div'));
   });
 
+  test('offers local script symbol completions inside canonical template expressions', async () => {
+    const document = await vscode.workspace.openTextDocument({
+      content: [
+        '[template]',
+        '  <div>{co}</div>',
+        '[/template]',
+        '',
+        '[ts]',
+        '  const count = 1;',
+        '  function increment() {}',
+        '  interface Props {}',
+        '[/ts]',
+      ].join('\n'),
+      language: 'kpa',
+    });
+    await vscode.window.showTextDocument(document);
+    await waitForExtensionActivation();
+
+    const offset = document.getText().indexOf('{co}') + 3;
+    const completions = await vscode.commands.executeCommand<vscode.CompletionList>(
+      'vscode.executeCompletionItemProvider',
+      document.uri,
+      document.positionAt(offset),
+    );
+    const labels = getCompletionLabels(completions);
+
+    assert.ok(labels.includes('count'));
+    assert.ok(labels.includes('increment'));
+    assert.ok(!labels.includes('Props'));
+  });
+
+  test('does not offer HTML attribute completions inside template expressions in opening tags', async () => {
+    const document = await vscode.workspace.openTextDocument({
+      content: [
+        '[template]',
+        '  <div class={co}></div>',
+        '[/template]',
+        '',
+        '[ts]',
+        '  const count = 1;',
+        '[/ts]',
+      ].join('\n'),
+      language: 'kpa',
+    });
+    await vscode.window.showTextDocument(document);
+    await waitForExtensionActivation();
+
+    const offset = document.getText().indexOf('{co}') + 3;
+    const completions = await vscode.commands.executeCommand<vscode.CompletionList>(
+      'vscode.executeCompletionItemProvider',
+      document.uri,
+      document.positionAt(offset),
+    );
+    const labels = getCompletionLabels(completions);
+
+    assert.ok(labels.includes('count'));
+    assert.ok(!labels.includes('class'));
+  });
+
   test('does not offer canonical template completions inside compatibility alias blocks', async () => {
     const document = await vscode.workspace.openTextDocument({
       content: '[html]\n  <\n[/html]',
@@ -117,6 +205,38 @@ suite('Extension integration', () => {
     assert.ok(completions);
     assert.ok(!completions.items.some((item) => item.label === 'div'));
     assert.ok(!completions.items.some((item) => item.label === 'template'));
+  });
+
+  test('provides hover information for local script symbols inside canonical template expressions', async () => {
+    const document = await vscode.workspace.openTextDocument({
+      content: [
+        '[template]',
+        '  <div>{count}</div>',
+        '[/template]',
+        '',
+        '[ts]',
+        '  const count = 1;',
+        '[/ts]',
+      ].join('\n'),
+      language: 'kpa',
+    });
+    await vscode.window.showTextDocument(document);
+    await waitForExtensionActivation();
+
+    const offset = document.getText().indexOf('{count}') + 2;
+    const hovers = await vscode.commands.executeCommand<vscode.Hover[]>(
+      'vscode.executeHoverProvider',
+      document.uri,
+      document.positionAt(offset),
+    );
+
+    assert.ok(hovers);
+    assert.ok(hovers.length > 0);
+
+    const hoverText = getHoverText(hovers);
+    assert.ok(hoverText.includes('variable count'));
+    assert.ok(hoverText.includes('Template-visible local variable'));
+    assert.ok(hoverText.includes('[ts]'));
   });
 
   test('publishes warning diagnostics for malformed canonical blocks', async () => {

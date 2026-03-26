@@ -1,7 +1,9 @@
 import * as vscode from 'vscode';
-import { canonicalTemplateBlock } from '../data/kpaBlocks';
 import { htmlTags } from '../data/htmlTags';
-import { isOffsetInsideSpecificBlock } from '../utils/blockUtils';
+import {
+  getCanonicalTemplateContext,
+  getTemplateExpressionContext,
+} from '../utils/templateContext';
 
 function createCompletionItem(label: string, snippet: string, documentation: string) {
   const item = new vscode.CompletionItem(label, vscode.CompletionItemKind.Snippet);
@@ -15,11 +17,11 @@ export function registerHtmlTagProvider(context: vscode.ExtensionContext) {
     'kpa',
     {
       provideCompletionItems(document, position) {
-        if (
-          !isOffsetInsideSpecificBlock(document.getText(), document.offsetAt(position), [
-            canonicalTemplateBlock,
-          ])
-        ) {
+        const text = document.getText();
+        const offset = document.offsetAt(position);
+        const templateContext = getCanonicalTemplateContext(text, offset);
+
+        if (!templateContext || getTemplateExpressionContext(text, offset, templateContext)) {
           return undefined;
         }
 

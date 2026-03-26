@@ -23,6 +23,7 @@ This repository owns:
 - `.kpa` language registration and grammar wiring
 - editor completions for KoppaJS block insertion
 - HTML tag and attribute completions in the canonical template block
+- local script-symbol completions and hover in canonical template expressions
 - warning diagnostics for malformed canonical block structure
 
 This repository does not own:
@@ -44,6 +45,10 @@ The supported editor contract is intentionally small:
   after `<`
 - HTML attribute completions are offered only while editing an opening HTML tag
   inside `[template]`
+- local template-visible top-level bindings from `[ts]` and `[js]` are offered
+  as completion items inside `{...}` expressions within canonical `[template]`
+- hover inside canonical template expressions can describe local
+  template-visible bindings from `[ts]` and `[js]`
 - warning diagnostics are emitted only for malformed canonical blocks
   recognized by the diagnostics engine
 
@@ -55,7 +60,8 @@ Current block behavior:
 
 `[html]` and `[tpl]` are structural compatibility aliases. They suppress
 top-level block insertion inside the alias block, but they do not receive
-template-specific HTML completions or runtime block diagnostics.
+template-specific HTML completions, local symbol intelligence, or runtime block
+diagnostics.
 
 ## Usage
 
@@ -65,7 +71,7 @@ structure:
 ```plaintext
 [template]
   <div class="card">
-    <p>Hello KoppaJS</p>
+    <p>{message}</p>
   </div>
 [/template]
 

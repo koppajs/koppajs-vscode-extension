@@ -1,8 +1,10 @@
 import * as vscode from 'vscode';
-import { canonicalTemplateBlock } from '../data/kpaBlocks';
 import { htmlAttributes } from '../data/htmlAttributes';
-import { isOffsetInsideSpecificBlock } from '../utils/blockUtils';
 import { isOffsetInsideOpeningHtmlTag } from '../utils/htmlUtils';
+import {
+  getCanonicalTemplateContext,
+  getTemplateExpressionContext,
+} from '../utils/templateContext';
 
 function createCompletionItem(label: string, snippet: string, documentation: string) {
   const item = new vscode.CompletionItem(label, vscode.CompletionItemKind.Snippet);
@@ -16,9 +18,11 @@ export function registerHtmlAttributeProvider(context: vscode.ExtensionContext) 
     provideCompletionItems(document, position) {
       const text = document.getText();
       const offset = document.offsetAt(position);
+      const templateContext = getCanonicalTemplateContext(text, offset);
 
       if (
-        !isOffsetInsideSpecificBlock(text, offset, [canonicalTemplateBlock]) ||
+        !templateContext ||
+        getTemplateExpressionContext(text, offset, templateContext) ||
         !isOffsetInsideOpeningHtmlTag(text, offset)
       ) {
         return undefined;

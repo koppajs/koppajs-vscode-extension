@@ -2,12 +2,16 @@ import * as vscode from 'vscode';
 import { registerBlockProvider } from './providers/blockProvider';
 import { registerHtmlTagProvider } from './providers/htmlTagProvider';
 import { registerHtmlAttributeProvider } from './providers/htmlAttributeProvider';
+import { registerTemplateExpressionCompletionProvider } from './providers/templateExpressionCompletionProvider';
+import { registerTemplateExpressionHoverProvider } from './providers/templateExpressionHoverProvider';
 import { updateDiagnostics, kpaDiagnosticCollection } from './diagnostics';
 
 export function activate(context: vscode.ExtensionContext) {
   registerBlockProvider(context);
   registerHtmlTagProvider(context);
   registerHtmlAttributeProvider(context);
+  registerTemplateExpressionCompletionProvider(context);
+  registerTemplateExpressionHoverProvider(context);
 
   kpaDiagnosticCollection.clear();
 
