@@ -1,8 +1,0 @@
-{
-  "recommendations": [
-    "esbenp.prettier-vscode",
-    "dbaeumer.vscode-eslint",
-    "vitest.explorer",
-    "ms-vscode.vscode-typescript-next"
-  ]
-}
