@@ -22,18 +22,27 @@ As of this repository state, KoppaJS has:
 - an internal parser-backed `.kpa` document model inside this repository
 - an internal local symbol extractor for `[ts]` and `[js]` blocks
 - local template-symbol completions and hover for file-local `[ts]` and `[js]` bindings
+- imported `.kpa` component tag completions plus component-tag hover/definition for resolvable workspace imports
+- first convention-based component API extraction for prop completions and hover summaries
+- published shared packages for `@koppajs/koppajs-language-core`, `@koppajs/koppajs-language-server`, and `@koppajs/koppajs-kpa-check`
+- a shared language-core surface for diagnostics, component resolution, semantic navigation, and workspace symbol extraction
+- extension runtime wiring to the published language server package
+- an internal workspace graph with cached discovery and dependency-aware invalidation
+- component call-site diagnostics plus safe quick fixes for missing required props, required slots, unknown emits, and unresolved imports
+- workspace-aware component references and rename across importer documents
+- workspace symbols for `.kpa` components and exported script symbols
+- an LSP-driven semantic client path for completions, diagnostics, hover, definition, references, rename, quick fixes, and symbol search
 - local template missing-binding diagnostics, definitions, and document symbols for file-local bindings
+- unresolved component diagnostics for canonical template markup
 - top-level block snippets
 - HTML tag and attribute completion inside canonical `[template]`
 - lightweight structural diagnostics for canonical blocks
 
 KoppaJS does not yet have:
 
-- a reusable language core consumed by more than the extension
-- a language server
-- workspace-wide semantic analysis
-- cross-file navigation, rename, or symbol intelligence
-- a CLI equivalent to IDE diagnostics
+- full project-wide framework semantics beyond imported TS and `.kpa` importer graphs reachable from the current file
+- full component call-site semantics such as slot body analysis beyond supported conventions, richer emits contracts, and deeper project-wide TS-backed prop validation
+- formatter and auto-import workflows comparable to mature framework ecosystems
 
 ## Target End State
 
@@ -110,26 +119,26 @@ true:
 
 ### Recommended Package Split
 
-- `@koppajs/language-core`
-- `@koppajs/language-server`
-- `@koppajs/kpa-check`
+- `@koppajs/koppajs-language-core`
+- `@koppajs/koppajs-language-server`
+- `@koppajs/koppajs-kpa-check`
 
 ### Responsibilities
 
-`@koppajs/language-core`:
+`@koppajs/koppajs-language-core`:
 
 - parse `.kpa` files
 - expose AST, document model, block ranges, and source maps
 - provide completion context, symbol extraction, and diagnostics primitives
 - remain independent from VS Code APIs
 
-`@koppajs/language-server`:
+`@koppajs/koppajs-language-server`:
 
 - expose LSP features over the shared language core
-- support diagnostics, hover, definitions, references, document symbols, and rename
+- support completions, diagnostics, hover, definitions, references, rename, code actions, and symbols
 - coordinate workspace analysis and file invalidation
 
-`@koppajs/kpa-check`:
+`@koppajs/koppajs-kpa-check`:
 
 - provide CLI diagnostics equivalent to the shared editor diagnostics
 - allow CI and local validation without VS Code
@@ -140,7 +149,7 @@ This repository then narrows to:
 
 - grammar and language configuration
 - VS Code client wiring
-- completion/diagnostic presentation adapters
+- minimal editor-only adapters such as block snippets
 - integration tests for the actual extension host behavior
 
 ### Exit Criteria
@@ -195,7 +204,7 @@ instead of knowing.
 
 ## Deliberate Non-Goals for Now
 
-Do not prioritize these before Stage 2 is stable:
+Do not prioritize these before the current shared-language layer is stable:
 
 - browser preview tooling
 - component inspector or devtools UI
@@ -205,11 +214,14 @@ Do not prioritize these before Stage 2 is stable:
 
 ## Immediate Next Actions
 
-- decide canonical block semantics for `[template]`, `[html]`, and `[tpl]`
-- define local script-to-template symbol visibility for `.kpa` files
-- prototype virtual-file generation for one narrow typed-completion path
-- identify the minimum semantic contracts that must come from `koppajs-core`
-- define when `koppajs-vite-plugin` and editor tooling should share source-map logic
+- deepen project-wide TypeScript-backed component semantics beyond the current
+  importer graph and local virtual-file model
+- stabilize the release/versioning contract for `@koppajs/koppajs-language-core`,
+  `@koppajs/koppajs-language-server`, and `@koppajs/koppajs-kpa-check`
+- define the formatter and auto-import story so editor ergonomics stop at fewer
+  manual recovery steps
+- identify which semantic contracts must still move in from `koppajs-core`
+  before true framework-grade project analysis is possible
 
 ## Meta Layer Maintenance
 

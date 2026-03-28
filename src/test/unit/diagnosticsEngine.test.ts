@@ -90,8 +90,31 @@ describe('collectBlockDiagnostics', () => {
     expect(collectBlockDiagnostics(text)).toEqual([]);
   });
 
-  it('avoids warning on compound expressions until expression-level semantic analysis is broader', () => {
-    const text = ['[template]', '  <div>{count + missing}</div>', '[/template]'].join('\n');
+  it('flags missing local template symbols in compound expressions when the identifier is top-level', () => {
+    const text = [
+      '[template]',
+      '  <div>{count + missing}</div>',
+      '[/template]',
+      '',
+      '[ts]',
+      'const count = 1;',
+      '[/ts]',
+    ].join('\n');
+    const [diagnostic] = collectBlockDiagnostics(text);
+
+    expect(diagnostic?.message).toBe('Lokales Template-Symbol [missing] wurde nicht gefunden.');
+  });
+
+  it('avoids warning on identifiers inside nested function scopes in template expressions', () => {
+    const text = [
+      '[template]',
+      '  <div>{items.map((item) => item.name)}</div>',
+      '[/template]',
+      '',
+      '[ts]',
+      'const items = [];',
+      '[/ts]',
+    ].join('\n');
 
     expect(collectBlockDiagnostics(text)).toEqual([]);
   });

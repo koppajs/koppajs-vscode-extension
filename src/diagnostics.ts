@@ -11,14 +11,26 @@ export function updateDiagnostics(document: vscode.TextDocument): void {
     return;
   }
 
-  const diagnostics = collectKpaDiagnostics(document.getText()).map(
-    ({ message, range }) =>
-      new vscode.Diagnostic(
+  const diagnostics = collectKpaDiagnostics(
+    document.getText(),
+    undefined,
+    document.uri.scheme === 'file' ? document.uri.fsPath : undefined,
+  )
+    .filter(
+      ({ code, message }) => code === undefined && message.startsWith('Lokales Template-Symbol ['),
+    )
+    .map(({ code, data, message, range }) => {
+      const diagnostic = new vscode.Diagnostic(
         new vscode.Range(range.line, range.startChar, range.line, range.endChar),
         message,
         vscode.DiagnosticSeverity.Warning,
-      ),
-  );
+      );
+      const diagnosticWithData = diagnostic as vscode.Diagnostic & { data?: unknown };
+
+      diagnostic.code = code;
+      diagnosticWithData.data = data;
+      return diagnostic;
+    });
 
   diagnostics.forEach((diagnostic) => {
     diagnostic.source = diagnosticSource;

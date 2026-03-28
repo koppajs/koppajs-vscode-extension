@@ -1,29 +1,27 @@
 # Specifications
 
-Specs define user-visible behavior in concrete terms before or alongside implementation.
+Specs define intended behavior before or alongside implementation work.
+They are the highest-precedence behavioral documents in this repository once approved.
 
-## When a Spec Is Required
+## When To Add Or Update A Spec
 
-Create or update a spec when changing:
+- A public behavior changes
+- A contributor-facing workflow changes
+- A governed root document changes shape
+- A new subsystem takes on externally visible behavior
 
-- completion behavior,
-- diagnostics behavior,
-- canonical block semantics,
-- or any workflow the user experiences directly inside VS Code.
+## Required Sections
 
-## Minimum Spec Contents
-
+- scope
 - behavior
-- description
-- inputs
-- outputs
 - constraints
 - edge cases
-- acceptance criteria
-- evolution phase
-- completeness level
-- known gaps
-- deferred complexity
-- technical debt items
+- validation or acceptance criteria
 
-Start from [TEMPLATE.md](TEMPLATE.md).
+Use the local spec template when one exists.
+
+## Current Specs
+
+- `TEMPLATE.md`
+- `kpa-editing-core.md`
+- `repository-documentation-contract.md`

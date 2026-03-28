@@ -2,6 +2,8 @@ import { supportedKpaBlocks } from '../data/kpaBlocks';
 import type { KpaDocument, KpaTagToken } from './ast';
 
 export interface KpaBlockDiagnostic {
+  code?: number | string;
+  data?: unknown;
   message: string;
   range: {
     line: number;

@@ -11,6 +11,7 @@ This repository is a bundled VS Code extension. It does not ship a standalone br
 | ESLint              | Static analysis for TypeScript, config scripts, and Node-facing files | `npm run lint`                               |
 | Prettier            | Consistent formatting for code, config, JSON, and Markdown            | `npm run format`, `npm run format:check`     |
 | Vitest              | Fast unit tests for pure helpers and parser-like logic                | `npm run test:unit`, `npm run test:coverage` |
+| `@vscode/vsce`      | VS Code extension packaging and `.vsix` payload verification          | `npm run release:check`                      |
 | `@vscode/test-cli`  | Integration tests in a real VS Code extension host                    | `npm run test:integration`                   |
 | Husky + lint-staged | Fast staged-file protection before commit                             | Git `pre-commit` hook                        |
 | GitHub Actions      | Repository-wide validation on push and pull request                   | `.github/workflows/ci.yml`                   |
@@ -36,8 +37,10 @@ Revisit this only if styling assets become first-class source files in the repo.
 3. `npm run lint` verifies TypeScript and script quality.
 4. `npm run typecheck` verifies source and test TypeScript.
 5. `npm run test:unit` verifies pure helper behavior quickly.
-6. `npm run test:integration` verifies extension behavior in the VS Code host.
-7. `npm run validate` runs the full baseline expected before merge.
+6. `npm run test:cli` verifies the shared diagnostics CLI still works from this repo.
+7. `npm run test:integration` verifies extension behavior in the VS Code host.
+8. `npm run release:check` verifies that the extension packages cleanly into a release `.vsix`.
+9. `npm run validate` runs the full baseline expected before merge.
 
 ## Test Layer Guidance
 

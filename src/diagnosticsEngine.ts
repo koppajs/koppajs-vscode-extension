@@ -1,23 +1,15 @@
 import { supportedKpaBlocks } from './data/kpaBlocks';
-import {
-  collectBlockDiagnosticsFromDocument,
-  type KpaBlockDiagnostic,
-} from './language/diagnosticsRules';
-import { parseKpaDocument } from './language/parser';
-import { collectTemplateDiagnosticsFromDocument } from './language/templateDiagnosticsRules';
+import { collectKpaDiagnosticsFromText } from './language/core';
+import type { KpaBlockDiagnostic } from './language/diagnosticsRules';
 
 export type { KpaBlockDiagnostic as KpaDiagnostic };
 
 export function collectKpaDiagnostics(
   text: string,
   knownBlocks: readonly string[] = supportedKpaBlocks,
+  sourcePath?: string,
 ): KpaBlockDiagnostic[] {
-  const document = parseKpaDocument(text);
-
-  return [
-    ...collectBlockDiagnosticsFromDocument(document, knownBlocks),
-    ...collectTemplateDiagnosticsFromDocument(document),
-  ];
+  return [...collectKpaDiagnosticsFromText(text, knownBlocks, sourcePath).diagnostics];
 }
 
 export const collectBlockDiagnostics = collectKpaDiagnostics;

@@ -2,7 +2,7 @@
 
 ## Prerequisites
 
-- Node.js `22` (see `.nvmrc`)
+- Node.js >= 22 (`.nvmrc` defaults to `22`)
 - `npm`
 
 Install dependencies:
@@ -49,6 +49,12 @@ Run the full validation baseline:
 
 ```bash
 npm run validate
+```
+
+Build the release `.vsix` and verify the package payload:
+
+```bash
+npm run release:check
 ```
 
 ## Running Tests

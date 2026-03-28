@@ -17,7 +17,8 @@ These gates describe what should be true before merging non-trivial changes. The
 
 ## Current Reality
 
-- GitHub Actions enforces `npm run validate` on push and pull request.
+- GitHub Actions enforces `xvfb-run -a npm run validate` on pull requests to `develop` and `main`, and on pushes to `develop` and `main`.
+- Release tags rerun the same validation gate on the maintainer default from `.nvmrc`, upload the validated `.vsix` to the GitHub release, and publish it to the Visual Studio Marketplace.
 - Unit-test coverage is available through `npm run test:coverage`.
 - Manual smoke checks remain necessary for syntax-highlighting verification and other editor-surface checks that are expensive to automate.
 - Playwright and Stylelint are intentionally absent because the repository has no standalone UI surface and no maintained stylesheet source files.

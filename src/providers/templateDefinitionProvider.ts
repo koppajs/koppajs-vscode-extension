@@ -1,30 +1,78 @@
 import * as vscode from 'vscode';
 import { collectLocalScriptSymbols } from '../language/symbols';
-import { getTemplateExpressionContext } from '../utils/templateContext';
-
-const identifierPattern = /[A-Za-z_$][\w$]*/;
+import { resolveCanonicalTemplateComponentAtOffset } from '../language/templateComponents';
+import {
+  createTemplateSemanticVirtualFileName,
+  getTemplateSemanticDefinitions,
+} from '../language/templateSemantics';
+import { getCanonicalTemplateIdentifierReferenceAtOffset } from '../language/templateExpressions';
+import {
+  getCanonicalTemplateContext,
+  getTemplateExpressionContext,
+} from '../utils/templateContext';
 
 export function registerTemplateDefinitionProvider(context: vscode.ExtensionContext) {
   const provider = vscode.languages.registerDefinitionProvider('kpa', {
     provideDefinition(document, position) {
       const text = document.getText();
       const offset = document.offsetAt(position);
-      const templateExpressionContext = getTemplateExpressionContext(text, offset);
+      const templateContext = getCanonicalTemplateContext(text, offset);
+
+      if (!templateContext) {
+        return undefined;
+      }
+
+      const sourcePath = document.uri.scheme === 'file' ? document.uri.fsPath : undefined;
+      const componentReference = resolveCanonicalTemplateComponentAtOffset(
+        templateContext.document,
+        sourcePath,
+        offset,
+      );
+
+      if (componentReference?.component.resolvedFilePath) {
+        return new vscode.Location(
+          vscode.Uri.file(componentReference.component.resolvedFilePath),
+          new vscode.Position(0, 0),
+        );
+      }
+
+      const templateExpressionContext = getTemplateExpressionContext(text, offset, templateContext);
 
       if (!templateExpressionContext) {
         return undefined;
       }
 
-      const wordRange = document.getWordRangeAtPosition(position, identifierPattern);
+      const currentVirtualFileName = createTemplateSemanticVirtualFileName(sourcePath);
+      const semanticDefinitions = getTemplateSemanticDefinitions(
+        templateExpressionContext.document,
+        sourcePath,
+        offset,
+      );
 
-      if (!wordRange) {
+      if (semanticDefinitions && semanticDefinitions.length > 0) {
+        return semanticDefinitions.map(
+          (definition) =>
+            new vscode.Location(
+              definition.fileName === currentVirtualFileName
+                ? document.uri
+                : vscode.Uri.file(definition.fileName),
+              toVsCodeRange(definition.range),
+            ),
+        );
+      }
+
+      const identifierReference = getCanonicalTemplateIdentifierReferenceAtOffset(
+        templateExpressionContext.document,
+        offset,
+      );
+
+      if (!identifierReference) {
         return undefined;
       }
 
-      const symbolName = document.getText(wordRange);
       const matchingSymbols = collectLocalScriptSymbols(
         templateExpressionContext.document,
-      ).templateVisible.filter((symbol) => symbol.name === symbolName);
+      ).templateVisible.filter((symbol) => symbol.name === identifierReference.name);
 
       if (matchingSymbols.length === 0) {
         return undefined;

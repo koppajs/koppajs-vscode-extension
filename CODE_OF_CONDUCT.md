@@ -1,18 +1,16 @@
 <a id="coc-top"></a>
 
-<!-- PROJECT LOGO -->
 <div align="center">
   <img src="https://public-assets-1b57ca06-687a-4142-a525-0635f7649a5c.s3.eu-central-1.amazonaws.com/koppajs/koppajs-logo-text-900x226.png" width="500" alt="KoppaJS Logo">
 </div>
 
 <br>
 
-<!-- TITLE -->
 <div align="center">
   <h1 align="center">KoppaJS – Code of Conduct</h1>
   <h3 align="center">A respectful and intentional space for building things that feel good to build.</h3>
   <p align="center">
-    <i align="center">Clarity, simplicity, and respect — the foundations of the KoppaJS community.</i>
+    <i>Clarity, simplicity, and respect — the foundations of the KoppaJS community.</i>
   </p>
 </div>
 
@@ -23,9 +21,12 @@
 ## Introduction
 
 KoppaJS is more than a framework — it is a philosophy of building with intention.
-To maintain a constructive and welcoming environment, this Code of Conduct outlines how we work together, how we treat each other, and how we resolve issues when they arise.
 
-This document applies to **everyone** participating in any KoppaJS space.
+To maintain a constructive, calm, and welcoming environment, this Code of Conduct
+defines how we collaborate, how we treat each other, and how we address problems
+when they arise.
+
+This document applies to **everyone** participating in any KoppaJS-related space.
 
 <p align="right">(<a href="#coc-top">back to top</a>)</p>
 
@@ -38,9 +39,12 @@ We pledge to make participation in the KoppaJS community:
 - **respectful**,
 - **inclusive**,
 - **safe**,
-- **and empowering** for developers of all backgrounds, skill levels, and identities.
+- **and empowering**
 
-We commit to fostering an atmosphere where ideas can grow without hostility or fear.
+for people of all backgrounds, identities, and experience levels.
+
+We commit to fostering an atmosphere where ideas can grow without hostility,
+pressure, or fear.
 
 <p align="right">(<a href="#coc-top">back to top</a>)</p>
 
@@ -48,22 +52,22 @@ We commit to fostering an atmosphere where ideas can grow without hostility or f
 
 ## Our Standards
 
-### Positive behavior includes:
+### Positive behavior includes
 
-- Showing empathy, respect, and understanding
+- Showing empathy, respect, and patience
 - Offering thoughtful, constructive feedback
 - Helping others learn and grow
-- Communicating clearly and professionally
-- Recognizing that disagreements can happen, and resolving them gracefully
+- Communicating clearly, calmly, and professionally
+- Accepting that disagreement is normal and resolving it with care
 
-### Unacceptable behavior includes:
+### Unacceptable behavior includes
 
-- Harassment, threats, or abusive comments
-- Discrimination or disrespect toward any identity or belief
+- Harassment, threats, or abusive language
+- Discrimination or disrespect toward any person or group
 - Trolling, insults, or personal attacks
-- Posting sexually explicit, violent, or hateful content
-- Sustained disruption of discussions
-- Sharing private information without permission
+- Sexually explicit, violent, or hateful content
+- Sustained disruption of discussions or collaboration
+- Sharing private information without explicit permission
 
 <p align="right">(<a href="#coc-top">back to top</a>)</p>
 
@@ -71,15 +75,16 @@ We commit to fostering an atmosphere where ideas can grow without hostility or f
 
 ## Responsibilities of Maintainers
 
-Maintainers are responsible for:
+Project maintainers are responsible for:
 
 - Clarifying acceptable behavior
 - Moderating issues, discussions, and pull requests
-- Acting on behavior that violates this Code
+- Addressing violations of this Code of Conduct
 - Removing or blocking harmful contributions
-- Ensuring a safe and collaborative environment
+- Protecting the safety and well-being of the community
 
-Maintainers may remove comments, code, or contributors that violate the rules.
+Maintainers may remove content or restrict participation when this Code
+is violated.
 
 <p align="right">(<a href="#coc-top">back to top</a>)</p>
 
@@ -87,21 +92,23 @@ Maintainers may remove comments, code, or contributors that violate the rules.
 
 ## Enforcement
 
-If you witness or experience behavior that violates this Code of Conduct, contact:
+If you experience or witness behavior that violates this Code of Conduct,
+please contact:
 
-**Bastian Bensch**
+**Bastian Bensch**  
 📧 **kontakt@koppajs.org**
 
-All reports will be handled discreetly and respectfully.
+All reports will be handled discreetly, respectfully, and in good faith.
 
-### Possible consequences for violations:
+### Possible responses to violations may include
 
-- Educational conversation or warning
-- Temporary or permanent ban from community spaces
-- Rejection of contributions
+- A private conversation or clarification
+- A formal warning
+- Temporary or permanent exclusion from community spaces
+- Rejection or removal of contributions
 - Escalation in severe cases
 
-Our goal is not punishment — it is safety, clarity, and restoration.
+The goal of enforcement is **safety, clarity, and restoration** — not punishment.
 
 <p align="right">(<a href="#coc-top">back to top</a>)</p>
 
@@ -109,12 +116,12 @@ Our goal is not punishment — it is safety, clarity, and restoration.
 
 ## Scope
 
-This Code of Conduct applies to:
+This Code of Conduct applies to all KoppaJS-related spaces, including but not limited to:
 
-- The KoppaJS GitHub repositories
-- Issues, pull requests, discussions
-- Community platforms linked to KoppaJS
-- Any public or private activity related to the KoppaJS project
+- GitHub repositories
+- Issues, pull requests, and discussions
+- Community platforms officially linked to KoppaJS
+- Public or private interactions related to the project
 
 <p align="right">(<a href="#coc-top">back to top</a>)</p>
 
@@ -122,7 +129,9 @@ This Code of Conduct applies to:
 
 ## Attribution
 
-This Code of Conduct is based on widely used open-source standards such as the **Contributor Covenant**, adapted to the philosophy and tone of KoppaJS.
+This Code of Conduct is inspired by widely used open-source standards,
+including the **Contributor Covenant**, adapted to the philosophy and tone
+of the KoppaJS project.
 
 ---
 

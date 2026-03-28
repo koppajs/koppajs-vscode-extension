@@ -33,17 +33,25 @@ Current repository behavior:
 - an internal local symbol extractor for top-level `[ts]` and `[js]` bindings
 - static block snippets
 - static HTML tag and attribute completions inside canonical `[template]`
+- imported `.kpa` component tag completions plus component-tag hover/definition for resolvable workspace imports
+- first extracted component API hints for props/emits/slots from supported `.kpa` conventions
+- published shared packages for `@koppajs/koppajs-language-core`, `@koppajs/koppajs-language-server`, and `@koppajs/koppajs-kpa-check`
+- an internal workspace graph that feeds component rename/references, symbol search, and CLI scanning with dependency-aware invalidation
 - local symbol completions and hover inside canonical template expressions
 - local missing-binding diagnostics and definition/document-symbol features for file-local bindings
+- workspace-aware component references/rename across importer documents
+- component call-site diagnostics plus safe quick fixes for missing required props and unresolved imports
+- workspace symbols for `.kpa` components and exported script bindings
+- unresolved-component diagnostics for canonical template markup
 - structural canonical-block diagnostics
 
 Missing:
 
-- a symbol model beyond local file scope
 - type model
-- cross-file analysis
+- full cross-file analysis and project-graph invalidation
 - deep semantic understanding of embedded TS/JS
-- editor features built on reusable language truth
+- deep component semantics beyond current prop/slot/emit call-site checks and basic API extraction
+- formatter and auto-import flows on top of the shared language truth
 
 ### Level 1: Parsed Document Intelligence
 
@@ -81,9 +89,9 @@ At this level, the extension can begin to offer:
 For ecosystem-grade maturity, the semantic engine must become shared
 infrastructure:
 
-- `@koppajs/language-core` owns parse, AST, source maps, symbols, semantic rules
-- `@koppajs/language-server` exposes those capabilities over LSP
-- `@koppajs/kpa-check` exposes the same diagnostics in CI and CLI workflows
+- `@koppajs/koppajs-language-core` owns parse, AST, source maps, symbols, semantic rules, and the workspace graph
+- `@koppajs/koppajs-language-server` exposes shared completions, diagnostics, code actions, navigation, and symbol features over LSP
+- `@koppajs/koppajs-kpa-check` exposes the same diagnostics in CI and CLI workflows
 
 At this level, the VS Code extension becomes a client instead of the primary
 owner of semantic logic.
@@ -187,6 +195,12 @@ Current status:
 - local template completions and hover now consume file-local top-level `[ts]` and `[js]` bindings
 - local semantic diagnostics, go-to-definition, and document symbols now partially consume that same file-local symbol layer
 - script-to-template visibility is currently modeled only at the local file level
+- imported `.kpa` components can now surface as canonical template tag completions and support hover/definition through resolvable workspace imports
+- a first convention-based API extractor can surface component props in opening-tag completions and summarize props/emits/slots in hover
+- component call sites can now emit required-prop/unknown-prop/basic literal-type diagnostics plus safe quick fixes
+- imported `.kpa` components can now participate in workspace-aware references/rename across importer documents
+- workspace symbols can now surface `.kpa` components plus exported script bindings
+- the same shared diagnostics core can now be exercised through the published `@koppajs/koppajs-kpa-check` package
 
 ### Step 3: Virtual Files and TS Bridge
 
@@ -201,6 +215,7 @@ Output of this step:
 - typed completions
 - hover types
 - definition and references for local and imported symbols
+- first imported-component resolution for canonical template tags
 
 ### Step 4: Workspace Graph
 
@@ -217,6 +232,16 @@ Output of this step:
 - workspace diagnostics
 - rename and references that work across the project
 
+Current status:
+
+- project config alias resolution now exists for `.kpa` component imports
+- workspace references/rename now cover importer documents for resolved `.kpa`
+  components
+- a dependency-aware workspace graph now backs workspace-level file discovery,
+  invalidation, and CLI/editor reuse
+- deeper framework-wide project graphs and broader TS-backed invalidation are
+  still missing
+
 ### Step 5: Language Server / CLI Extraction
 
 Build next:
@@ -229,6 +254,13 @@ Output of this step:
 - editor and CLI parity
 - reuse beyond VS Code
 - less semantic drift across the ecosystem
+
+Current status:
+
+- `@koppajs/koppajs-language-core` now centralizes the shared semantic service and workspace graph
+- `@koppajs/koppajs-language-server` now serves semantic completions, diagnostics, hover, definition, references, rename, quick fixes, and symbols over LSP
+- `@koppajs/koppajs-kpa-check` now ships as a published CLI package
+- the remaining gap is deeper framework-wide semantic contracts, not the absence of a shared server/CLI split
 
 ## Suggested Internal API Shape
 

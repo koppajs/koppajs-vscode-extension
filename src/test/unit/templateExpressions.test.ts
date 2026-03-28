@@ -2,7 +2,9 @@ import { describe, expect, it } from 'vitest';
 import { parseKpaDocument } from '../../language/parser';
 import {
   collectCanonicalTemplateExpressions,
+  collectCanonicalTemplateIdentifierReferences,
   getCanonicalTemplateExpressionAtOffset,
+  getCanonicalTemplateIdentifierReferenceAtOffset,
   getTemplateExpressionRootReference,
 } from '../../language/templateExpressions';
 
@@ -40,6 +42,36 @@ describe('getCanonicalTemplateExpressionAtOffset', () => {
     const offset = text.indexOf('{count}') + 2;
 
     expect(getCanonicalTemplateExpressionAtOffset(document, offset)?.text).toBe('{count}');
+  });
+});
+
+describe('collectCanonicalTemplateIdentifierReferences', () => {
+  it('collects top-level identifier references from canonical template expressions', () => {
+    const text = '[template]\n  <div>{ user?.format(count) + suffix }</div>\n[/template]';
+    const document = parseKpaDocument(text);
+
+    expect(
+      collectCanonicalTemplateIdentifierReferences(document).map((reference) => reference.name),
+    ).toEqual(['user', 'count', 'suffix']);
+  });
+
+  it('ignores property names and nested function scopes in canonical template expressions', () => {
+    const text = '[template]\n  <div>{items.map((item) => item.name)}</div>\n[/template]';
+    const document = parseKpaDocument(text);
+
+    expect(
+      collectCanonicalTemplateIdentifierReferences(document).map((reference) => reference.name),
+    ).toEqual(['items']);
+  });
+});
+
+describe('getCanonicalTemplateIdentifierReferenceAtOffset', () => {
+  it('returns the identifier reference at the current cursor offset', () => {
+    const text = '[template]\n  <div>{count + other}</div>\n[/template]';
+    const document = parseKpaDocument(text);
+    const offset = text.indexOf('other') + 2;
+
+    expect(getCanonicalTemplateIdentifierReferenceAtOffset(document, offset)?.name).toBe('other');
   });
 });
 

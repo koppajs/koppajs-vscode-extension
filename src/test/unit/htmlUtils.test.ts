@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { isOffsetInsideOpeningHtmlTag } from '../../utils/htmlUtils';
+import { getOpeningHtmlTagNameAtOffset, isOffsetInsideOpeningHtmlTag } from '../../utils/htmlUtils';
 
 describe('isOffsetInsideOpeningHtmlTag', () => {
   it('returns true while editing an opening tag', () => {
@@ -21,5 +21,20 @@ describe('isOffsetInsideOpeningHtmlTag', () => {
     const offset = text.indexOf('/button') + 1;
 
     expect(isOffsetInsideOpeningHtmlTag(text, offset)).toBe(false);
+  });
+
+  it('keeps an unfinished opening tag active while the user is still typing', () => {
+    const text = '<UserCard title';
+    const offset = text.length;
+
+    expect(isOffsetInsideOpeningHtmlTag(text, offset)).toBe(true);
+    expect(getOpeningHtmlTagNameAtOffset(text, offset)).toBe('UserCard');
+  });
+
+  it('returns the opening tag name at the cursor offset', () => {
+    const text = '<UserCard title="Hello">';
+    const offset = text.indexOf('title');
+
+    expect(getOpeningHtmlTagNameAtOffset(text, offset)).toBe('UserCard');
   });
 });

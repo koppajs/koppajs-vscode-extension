@@ -1,10 +1,7 @@
 import type { KpaDocument } from './ast';
 import type { KpaBlockDiagnostic } from './diagnosticsRules';
 import { collectLocalScriptSymbols } from './symbols';
-import {
-  collectCanonicalTemplateExpressions,
-  getTemplateExpressionRootReference,
-} from './templateExpressions';
+import { collectCanonicalTemplateIdentifierReferences } from './templateExpressions';
 
 const knownGlobalTemplateNames = new Set([
   'Array',
@@ -45,28 +42,19 @@ export function collectTemplateDiagnosticsFromDocument(
     collectLocalScriptSymbols(document).templateVisible.map((symbol) => symbol.name),
   );
 
-  return collectCanonicalTemplateExpressions(document).flatMap((expression) => {
-    const rootReference = getTemplateExpressionRootReference(document, expression);
-
-    if (!rootReference) {
-      return [];
-    }
-
-    if (
-      templateVisibleNames.has(rootReference.name) ||
-      knownGlobalTemplateNames.has(rootReference.name)
-    ) {
+  return collectCanonicalTemplateIdentifierReferences(document).flatMap((reference) => {
+    if (templateVisibleNames.has(reference.name) || knownGlobalTemplateNames.has(reference.name)) {
       return [];
     }
 
     return [
       {
         range: {
-          line: rootReference.range.start.line,
-          startChar: rootReference.range.start.character,
-          endChar: rootReference.range.end.character,
+          line: reference.range.start.line,
+          startChar: reference.range.start.character,
+          endChar: reference.range.end.character,
         },
-        message: `Lokales Template-Symbol [${rootReference.name}] wurde nicht gefunden.`,
+        message: `Lokales Template-Symbol [${reference.name}] wurde nicht gefunden.`,
       },
     ];
   });

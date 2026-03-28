@@ -2,19 +2,21 @@
 
 ## Current Baseline
 
-The repository uses two automated test layers plus manual smoke checks:
+The repository uses three automated verification layers plus manual smoke checks:
 
 - Vitest for fast unit tests around pure helper and parser-like logic
+- `@koppajs/koppajs-kpa-check` smoke coverage through the published CLI package
 - `@vscode/test-cli` for integration tests in a real VS Code extension host
 - manual smoke checks for syntax-highlighting and packaging-adjacent behavior
 
-CI runs `npm run validate`, and unit-test coverage is available through `npm run test:coverage`.
+CI runs `xvfb-run -a npm run validate` on Node.js 22 and 24, and unit-test coverage is available through `npm run test:coverage`.
 
 ## Test Philosophy
 
 - Prefer the cheapest test that protects the behavior being changed.
 - Put parser-like and block-detection logic under focused tests.
 - Use VS Code integration tests for activation, provider registration, and end-to-end editor behavior.
+- Keep the published CLI smoke-covered so the extension does not drift away from the shared diagnostics release surface.
 - Keep manual smoke testing explicit until CI coverage exists.
 
 ## Test Pyramid
@@ -38,7 +40,15 @@ Use the VS Code test host for:
 - diagnostics emitted for representative `.kpa` documents
 - completion behavior in realistic editor contexts
 
-### 3. Manual Smoke Tests
+### 3. CLI Packaging And Runtime Checks
+
+Use the shared CLI smoke check and release packaging check for:
+
+- verifying that the published `@koppajs/koppajs-kpa-check` runtime still works from this repository
+- verifying that the extension packages into a `.vsix` without shipping unintended files
+- catching ESM/CJS regressions in built artifacts before release
+
+### 4. Manual Smoke Tests
 
 Required until automated coverage improves:
 
@@ -70,6 +80,7 @@ See [docs/quality/manual-smoke-checklist.md](docs/quality/manual-smoke-checklist
 | Completion trigger/content change | Integration tests or isolated helper tests plus smoke verification |
 | Grammar-only change               | Manual smoke verification and spec/doc update                      |
 | Large structural refactor         | Tests for changed behaviors plus ADR                               |
+| Release or packaging change       | `npm run release:check` plus the relevant docs/workflow update     |
 
 ## Mocking Policy
 

@@ -2,24 +2,34 @@ name: CI
 
 on:
   pull_request:
+    branches:
+      - develop
+      - main
   push:
     branches:
       - main
-      - master
+      - develop
 
 jobs:
   validate:
+    name: Validate (Node.js ${{ matrix.node-version }})
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version:
+          - '22'
+          - '24'
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
-          node-version-file: '.nvmrc'
+          node-version: ${{ matrix.node-version }}
           cache: 'npm'
 
       - name: Install dependencies

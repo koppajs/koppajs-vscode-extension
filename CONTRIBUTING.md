@@ -1,19 +1,76 @@
-# Contributing
+<a id="contributing-top"></a>
 
-## Start Here
+<div align="center">
+  <img src="https://public-assets-1b57ca06-687a-4142-a525-0635f7649a5c.s3.eu-central-1.amazonaws.com/koppajs/koppajs-logo-text-900x226.png" width="500" alt="KoppaJS Logo">
+</div>
 
-Read these documents before making structural or user-visible changes:
+<br>
 
-- [DECISION_HIERARCHY.md](DECISION_HIERARCHY.md)
-- [AI_CONSTITUTION.md](AI_CONSTITUTION.md)
-- [ARCHITECTURE.md](ARCHITECTURE.md)
-- [DEVELOPMENT_RULES.md](DEVELOPMENT_RULES.md)
-- [TESTING_STRATEGY.md](TESTING_STRATEGY.md)
+<div align="center">
+  <h1 align="center">Contributing to KoppaJS Projects</h1>
+  <h3 align="center">Build with intention. Contribute with clarity.</h3>
+  <p align="center">
+    <i>A framework ecosystem powered by simplicity, transparency, and responsibility.</i>
+  </p>
+</div>
+
+<br>
+
+---
+
+## Philosophy
+
+> _“Only start things you are willing to finish with dedication.”_
+
+KoppaJS favors explicit behavior, readable systems, and deliberate repository contracts.
+
+Contributions should preserve those traits:
+
+- keep behavior understandable and traceable
+- prefer explicit contracts over hidden convention
+- update documentation when the owned contract changes
+- leave the repository in a state where both humans and AI agents can recover intent locally
+
+<p align="right">(<a href="#contributing-top">back to top</a>)</p>
+
+---
+
+## Repository Governance
+
+Before structural, workflow, or user-visible changes, read the local governance layer:
+
+- [DECISION_HIERARCHY.md](./DECISION_HIERARCHY.md)
+- [ARCHITECTURE.md](./ARCHITECTURE.md)
+- [DEVELOPMENT_RULES.md](./DEVELOPMENT_RULES.md)
+- [docs/specs/README.md](./docs/specs/README.md)
+- [docs/specs/repository-documentation-contract.md](./docs/specs/repository-documentation-contract.md)
+
+If your change moves package behavior, contributor workflow, or governed file shape, update the corresponding documentation in the same change.
+
+<p align="right">(<a href="#contributing-top">back to top</a>)</p>
+
+---
+
+## Documentation Contract
+
+The root documents `README.md`, `CHANGELOG.md`, `CODE_OF_CONDUCT.md`, and `CONTRIBUTING.md` are governed by [docs/specs/repository-documentation-contract.md](./docs/specs/repository-documentation-contract.md).
+
+Before committing, run:
+
+```bash
+npm run check:docs
+```
+
+The local pre-commit hook runs the same guard and blocks the commit when the contract fails.
+
+<p align="right">(<a href="#contributing-top">back to top</a>)</p>
+
+---
 
 ## Requirements
 
-- Node.js `22` (see `.nvmrc`)
-- `npm`
+- Node.js >= 22 (`.nvmrc` defaults to `22`)
+- npm >= 10
 
 Install dependencies:
 
@@ -21,67 +78,108 @@ Install dependencies:
 npm install
 ```
 
-## Common Commands
+<p align="right">(<a href="#contributing-top">back to top</a>)</p>
 
-```bash
-npm run format
-npm run format:check
-npm run compile
-npm run watch
-npm run lint
-npm run typecheck
-npm run test:unit
-npm run test:integration
-npm run test:coverage
-npm run validate
-npm run compile-tests
-npm test
-npm run package
-npm run dump:ai
+---
+
+## Development Workflow
+
+Use the smallest change that solves the actual problem.
+
+A safe default workflow is:
+
+1. Read the affected code, tests, and local governance docs before changing behavior.
+2. Update the owned specs and governed root docs in the same change when the contract moves.
+3. Run `npm run check:docs` before broader quality checks.
+4. Run the repository quality gates that cover the affected behavior.
+5. Keep unrelated edits out of the same change whenever possible.
+
+Repository-specific focus for this project:
+
+- Keep the extension a thin editor adapter over the shared KoppaJS language packages.
+- Align editor contributions, diagnostics behavior, quick fixes, and docs in the same change.
+
+<p align="right">(<a href="#contributing-top">back to top</a>)</p>
+
+---
+
+## Code Style & Quality
+
+All KoppaJS repositories value clarity over cleverness.
+
+Expectations for changes in this repository:
+
+- keep implementations explicit and easy to review
+- prefer updating governing docs over leaving intent implicit
+- keep quality-gate commands passing before asking for review
+- do not silently change public behavior or contributor workflow
+
+<p align="right">(<a href="#contributing-top">back to top</a>)</p>
+
+---
+
+## Commit Conventions
+
+KoppaJS uses **Conventional Commits**.
+
+Example:
+
+```text
+feat: harden documentation contract validation
 ```
 
-## Contribution Rules
+Keep commit scope aligned with the actual repository change.
 
-- User-visible behavior changes require a spec update in `docs/specs/`.
-- Structural or long-lived workflow decisions require an ADR in `docs/adr/`.
-- Keep grammar, providers, diagnostics, tests, and docs aligned in the same change.
-- Prefer small, explicit modules over new abstraction layers.
-- Treat `npm run dump:ai` as an optional repository-audit utility, not as a merge gate.
-- If verification is incomplete, document the gap clearly in the change summary.
+<p align="right">(<a href="#contributing-top">back to top</a>)</p>
 
-## Changes That Need Extra Care
+---
 
-### Block Semantics
+## Testing Guidelines
 
-If you add, rename, or remove a block such as `[template]` or `[ts]`, update all of the following:
+Every user-visible or contract-visible change should leave verification behind.
 
-- `syntaxes/kpa.tmLanguage.json`
-- completion providers under `src/providers/`
-- `src/diagnostics.ts`
-- relevant specs and ADRs
-- `README.md`
-- tests and manual smoke checklist
+That means:
 
-### Tooling or Workflow
+- update specs when behavior changes
+- add or adjust automated tests when executable behavior changes
+- run the repository commands that cover the affected area
+- keep the documentation contract valid when the root docs change
 
-If you change build, lint, packaging, or test workflows, update:
+<p align="right">(<a href="#contributing-top">back to top</a>)</p>
 
-- `TESTING_STRATEGY.md`
-- `DEVELOPMENT_README.md`
-- `docs/quality/quality-gates.md`
-- `docs/meta/tooling-baseline.md`
-- `.github/instructions/ai-workflow.md` when AI workflow expectations change
+---
 
-## Pull Request Checklist
+## Scripts
 
-- `npm run validate` passes locally, or the gap is documented
-- Spec updated if behavior changed
-- ADR added if structure changed
-- Docs match the code
-- Tests added or manual smoke coverage noted
-- Changelog updated when release-facing behavior changes
+| Command                 | Description                                                                           |
+| ----------------------- | ------------------------------------------------------------------------------------- |
+| `npm run check:docs`    | Validate README, CHANGELOG, CODE_OF_CONDUCT, CONTRIBUTING, and the local doc contract |
+| `npm run check`         | Run the main local quality gate                                                       |
+| `npm run validate`      | Run the repository validation flow                                                    |
+| `npm run release:check` | Build the release `.vsix` and verify the package payload                              |
+| `npm run test`          | Run the test suite                                                                    |
+| `npm run lint`          | Run lint checks                                                                       |
+| `npm run format`        | Format repository files                                                               |
+| `npm run format:check`  | Check formatting without rewriting files                                              |
 
-## Commit Messages
+<p align="right">(<a href="#contributing-top">back to top</a>)</p>
 
-Conventional commits are preferred but not currently enforced by repository tooling.
-Staged files are still guarded by a `pre-commit` hook that runs `lint-staged`.
+---
+
+## Releasing
+
+Release and packaging expectations remain documented in `CHANGELOG.md`, `ROADMAP.md`, `RELEASE.md`, and the repository workflows.
+
+When a release changes the public contract, update `CHANGELOG.md`, the relevant specs, and the governed root documents together.
+
+<p align="right">(<a href="#contributing-top">back to top</a>)</p>
+
+---
+
+## Need Help?
+
+Open an issue: https://github.com/koppajs/koppajs-vscode-extension/issues
+
+If the question is about contributor expectations or file shape, start with [DEVELOPMENT_RULES.md](./DEVELOPMENT_RULES.md) and [docs/specs/repository-documentation-contract.md](./docs/specs/repository-documentation-contract.md).
+
+<p align="right">(<a href="#contributing-top">back to top</a>)</p>

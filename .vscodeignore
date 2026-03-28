@@ -6,6 +6,8 @@
 coverage/**
 docs/**
 out/**
+packages/**
+dist/kpa-check.js
 node_modules/**
 scripts/**
 src/**
@@ -20,12 +22,13 @@ DECISION_HIERARCHY.md
 DEVELOPMENT_README.md
 DEVELOPMENT_RULES.md
 ROADMAP.md
+RELEASE.md
 TESTING_STRATEGY.md
 example.kpa
 package-lock.json
 tsconfig.test.json
 vitest.config.ts
-webpack.config.js
+webpack.config.cjs
 vsc-extension-quickstart.md
 **/tsconfig.json
 **/.eslintrc.json
