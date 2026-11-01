@@ -1,0 +1,8 @@
+coverage
+dist
+node_modules
+out
+.vscode-test
+*.vsix
+.diffuno
+.local

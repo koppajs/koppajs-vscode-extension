@@ -1,0 +1,185 @@
+{
+  "name": "koppajs-vscode-extension",
+  "displayName": "KoppaJS VS Code Extension",
+  "icon": "assets/icon.png",
+  "description": "VS Code editing support for KoppaJS .kpa files: grammar, completions, and structural diagnostics.",
+  "keywords": [
+    "koppa",
+    "koppajs",
+    "koppa.js",
+    "frontend",
+    "framework",
+    "ui-framework",
+    "typescript",
+    "vite",
+    "reactivity",
+    "single-file-components",
+    "modular",
+    "lightweight",
+    "high-performance",
+    "web-development",
+    "javascript"
+  ],
+  "author": "Bastian Bensch",
+  "license": "Apache-2.0",
+  "homepage": "https://koppajs.org",
+  "bugs": {
+    "url": "https://github.com/koppajs/koppajs-vscode-extension/issues"
+  },
+  "publisher": "koppajs",
+  "version": "1.1.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/koppajs/koppajs-vscode-extension"
+  },
+  "engines": {
+    "node": "^22.22.1 || ^24.0.0 || >=26.0.0",
+    "vscode": "^1.144.0"
+  },
+  "categories": [
+    "Other",
+    "Programming Languages"
+  ],
+  "activationEvents": [
+    "onLanguage:kpa"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "languages": [
+      {
+        "id": "kpa",
+        "extensions": [
+          ".kpa"
+        ],
+        "aliases": [
+          "KPA",
+          "kpa"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "kpa",
+        "scopeName": "source.kpa",
+        "path": "./syntaxes/kpa.tmLanguage.json"
+      }
+    ],
+    "embeddedLanguages": {
+      "text.html.basic": "html",
+      "source.js": "javascript",
+      "source.css": "css",
+      "source.ts": "typescript",
+      "source.sass": "sass",
+      "source.scss": "scss"
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run package",
+    "compile": "webpack && node scripts/prepare-dist-output.mjs",
+    "watch": "node scripts/prepare-dist-output.mjs && webpack --watch",
+    "package": "webpack --mode production --devtool hidden-source-map && node scripts/prepare-dist-output.mjs",
+    "typecheck": "tsc --noEmit -p tsconfig.test.json",
+    "compile-tests": "tsc -p tsconfig.test.json && node scripts/prepare-test-output.mjs",
+    "watch-tests": "node scripts/prepare-test-output.mjs && tsc -p tsconfig.test.json -w",
+    "lint": "eslint . --ext .ts,.js,.cjs,.mjs",
+    "lint:fix": "npm run lint -- --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test:unit": "vitest run",
+    "test:cli": "npm run compile && node scripts/test-kpa-check.mjs",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "pretest:integration": "npm run compile-tests && npm run compile",
+    "test:integration": "vscode-test",
+    "test": "npm run test:unit && npm run test:cli && npm run test:ecosystem && npm run test:integration",
+    "kpa:check": "node scripts/kpa-check.mjs",
+    "test:run": "npm run test",
+    "check": "npm run check:docs && npm run lint && npm run typecheck && npm run test",
+    "release:check": "node scripts/check-release-package.mjs",
+    "validate": "npm run check:docs && npm run format:check && npm run check && npm run release:check",
+    "postinstall": "node scripts/prepare-languageclient.mjs",
+    "prepare": "husky",
+    "dump:ai": "node scripts/project-dump.mjs",
+    "check:docs": "node scripts/check-doc-contract.mjs",
+    "test:ecosystem": "node scripts/test-ecosystem.mjs",
+    "test:integration:release": "npm run compile-tests && vscode-test"
+  },
+  "lint-staged": {
+    "*.{ts,js,cjs,mjs}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md,yml,yaml}": "prettier --write"
+  },
+  "dependencies": {
+    "@koppajs/koppajs-language-server": "0.2.1",
+    "vscode-languageclient": "11.0.0",
+    "vscode-languageserver": "^11.0.0",
+    "vscode-languageserver-textdocument": "^1.0.16"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@koppajs/koppajs-core": "3.0.12",
+    "@koppajs/koppajs-kpa-check": "0.2.2",
+    "@koppajs/koppajs-language-core": "0.2.2",
+    "@koppajs/koppajs-router": "0.1.9",
+    "@koppajs/koppajs-vite-plugin": "2.0.1",
+    "@types/mocha": "^10.0.10",
+    "@types/node": "^22.20.5",
+    "@types/vscode": "~1.144.0",
+    "@typescript-eslint/eslint-plugin": "^8.72.1",
+    "@typescript-eslint/parser": "^8.72.1",
+    "@vitest/coverage-v8": "^5.0.5",
+    "@vscode/test-cli": "0.0.15",
+    "@vscode/test-electron": "^3.1.0",
+    "@vscode/vsce": "4.1.0",
+    "eslint": "10.14.0",
+    "globals": "^17.13.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^17.6.0",
+    "prettier": "^3.9.10",
+    "ts-loader": "^9.6.2",
+    "typescript": "~6.0.3",
+    "vite": "^8.3.5",
+    "vitest": "^5.0.5",
+    "webpack": "^5.112.2",
+    "webpack-cli": "^7.3.1"
+  },
+  "overrides": {
+    "@eslint/config-array@0.23.5": {
+      "minimatch": "11.0.3"
+    },
+    "@typescript-eslint/typescript-estree@8.72.1": {
+      "minimatch": "11.0.3"
+    },
+    "@vscode/test-cli@0.0.15": {
+      "glob": "14.0.3",
+      "minimatch": "11.0.3"
+    },
+    "@vscode/vsce@4.1.0": {
+      "minimatch": "11.0.3"
+    },
+    "eslint@10.14.0": {
+      "minimatch": "11.0.3"
+    },
+    "glob@14.0.3": {
+      "minimatch": "11.0.3"
+    },
+    "mocha@11.8.0": {
+      "diff": "8.0.3",
+      "glob": "14.0.3",
+      "minimatch": "11.0.3",
+      "serialize-javascript": "7.1.4"
+    },
+    "test-exclude@8.0.0": {
+      "glob": "14.0.3",
+      "minimatch": "11.0.3"
+    },
+    "vscode-languageclient@11.0.0": {
+      "minimatch": "11.0.3"
+    }
+  },
+  "type": "module",
+  "private": false
+}

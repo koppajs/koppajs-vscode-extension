@@ -1,0 +1,31 @@
+[template]
+  <section class="ecosystem-counter">
+    <h1>{{title}}</h1>
+    <button type="button">Count: {{formatCount(count)}}</button>
+  </section>
+[/template]
+
+[js]
+  return {
+    state: { count: 0 },
+    props: {
+      title: { type: String, default: 'Ecosystem counter' },
+    },
+    methods: {
+      formatCount(value) {
+        return String(value);
+      },
+    },
+    events: [
+      ['click', 'button', function () {
+        this.count++;
+      }],
+    ],
+  };
+[/js]
+
+[css]
+  .ecosystem-counter {
+    display: block;
+  }
+[/css]
