@@ -73,9 +73,10 @@ export function getTemplateExpressionRootReference(
 export function collectCanonicalTemplateIdentifierReferences(
   document: KpaDocument,
 ): readonly KpaTemplateIdentifierReference[] {
-  return collectCanonicalTemplateExpressions(document).flatMap((expression) =>
-    collectTemplateIdentifierReferences(document, expression),
-  );
+  // The shared language server owns double-brace runtime binding semantics.
+  return collectCanonicalTemplateExpressions(document)
+    .filter((expression) => !expression.text.startsWith('{{'))
+    .flatMap((expression) => collectTemplateIdentifierReferences(document, expression));
 }
 
 export function getCanonicalTemplateIdentifierReferenceAtOffset(

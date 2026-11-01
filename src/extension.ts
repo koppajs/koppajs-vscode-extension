@@ -8,9 +8,12 @@ import {
 import { kpaDiagnosticCollection, updateDiagnostics } from './diagnostics';
 import { registerBlockProvider } from './providers/blockProvider';
 import { registerComponentCodeActionProvider } from './providers/componentCodeActionProvider';
-import { registerDocumentSymbolProvider } from './providers/documentSymbolProvider';
-import { registerHtmlAttributeProvider } from './providers/htmlAttributeProvider';
-import { registerHtmlTagProvider } from './providers/htmlTagProvider';
+import { kpaDiagnosticCodes } from './language/diagnosticCodes';
+import {
+  toEnglishCompletionItem,
+  toEnglishDiagnostic,
+  withEnglishErrors,
+} from './providers/englishPresentation';
 import { registerLocalReferencesProvider } from './providers/localReferencesProvider';
 import { registerLocalRenameProvider } from './providers/localRenameProvider';
 import { registerTemplateDefinitionProvider } from './providers/templateDefinitionProvider';
@@ -18,22 +21,19 @@ import { registerTemplateExpressionCompletionProvider } from './providers/templa
 import { registerTemplateExpressionHoverProvider } from './providers/templateExpressionHoverProvider';
 import { registerWorkspaceIndexService } from './providers/workspaceIndexService';
 import { registerWorkspaceSymbolProvider } from './providers/workspaceSymbolProvider';
-import { getTemplateExpressionContext } from './utils/templateContext';
+import { isLegacyExpressionRequest, isLocalSymbolRequest } from './providers/providerOwnership';
 
 let languageClient: LanguageClient | undefined;
 
 export async function activate(context: vscode.ExtensionContext) {
   registerWorkspaceIndexService(context);
   registerBlockProvider(context);
-  registerHtmlTagProvider(context);
-  registerHtmlAttributeProvider(context);
   registerTemplateExpressionCompletionProvider(context);
   registerTemplateExpressionHoverProvider(context);
   registerTemplateDefinitionProvider(context);
   registerLocalReferencesProvider(context);
   registerLocalRenameProvider(context);
   registerComponentCodeActionProvider(context);
-  registerDocumentSymbolProvider(context);
   registerWorkspaceSymbolProvider(context);
 
   languageClient = await startLanguageClient(context);
@@ -71,13 +71,13 @@ export async function activate(context: vscode.ExtensionContext) {
     updateDiagnostics(activeDocument);
   }
 
-  console.log('Koppa Extension ist aktiviert.');
+  console.log('Koppa Extension is activated.');
 }
 
 export async function deactivate() {
   await languageClient?.stop();
   kpaDiagnosticCollection.dispose();
-  console.log('Koppa Extension wurde deaktiviert.');
+  console.log('Koppa Extension was deactivated.');
 }
 
 async function startLanguageClient(context: vscode.ExtensionContext): Promise<LanguageClient> {
@@ -88,16 +88,63 @@ async function startLanguageClient(context: vscode.ExtensionContext): Promise<La
       { language: 'kpa', scheme: 'untitled' },
     ],
     middleware: {
-      provideCompletionItem(document, position, completionContext, token, next) {
-        if (document.languageId === 'kpa') {
-          const offset = document.offsetAt(position);
-
-          if (getTemplateExpressionContext(document.getText(), offset)) {
-            return [];
-          }
+      handleDiagnostics(uri, diagnostics, next) {
+        next(uri, diagnostics.map(toEnglishDiagnostic));
+      },
+      provideWorkspaceSymbols(query, token, next) {
+        // An empty editor window has no server workspace roots. Preserve symbols
+        // for its open files through the local index, without double results.
+        return vscode.workspace.workspaceFolders?.length ? next(query, token) : [];
+      },
+      provideCodeActions(document, range, actionContext, token, next) {
+        // These fixes are owned by the local component adapter, alongside its
+        // additional slot/emit fixes that server 0.2 does not implement.
+        const diagnostics = actionContext.diagnostics.filter(
+          (diagnostic) =>
+            diagnostic.source !== 'koppa-diagnostics' ||
+            (diagnostic.code !== kpaDiagnosticCodes.missingComponentProp &&
+              diagnostic.code !== kpaDiagnosticCodes.unresolvedComponentTag),
+        );
+        return next(document, range, { ...actionContext, diagnostics }, token);
+      },
+      async provideCompletionItem(document, position, completionContext, token, next) {
+        if (isLegacyExpressionRequest(document.getText(), document.offsetAt(position))) {
+          return [];
         }
-
-        return next(document, position, completionContext, token);
+        const completions = await next(document, position, completionContext, token);
+        const items = Array.isArray(completions) ? completions : completions?.items;
+        items?.forEach(toEnglishCompletionItem);
+        return completions;
+      },
+      provideHover(document, position, token, next) {
+        if (isLegacyExpressionRequest(document.getText(), document.offsetAt(position))) {
+          return null;
+        }
+        return next(document, position, token);
+      },
+      provideDefinition(document, position, token, next) {
+        if (isLegacyExpressionRequest(document.getText(), document.offsetAt(position))) {
+          return null;
+        }
+        return next(document, position, token);
+      },
+      provideReferences(document, position, referenceContext, token, next) {
+        if (isLocalSymbolRequest(document.getText(), document.offsetAt(position))) {
+          return [];
+        }
+        return next(document, position, referenceContext, token);
+      },
+      prepareRename(document, position, token, next) {
+        if (isLocalSymbolRequest(document.getText(), document.offsetAt(position))) {
+          return null;
+        }
+        return withEnglishErrors(() => next(document, position, token));
+      },
+      provideRenameEdits(document, position, newName, token, next) {
+        if (isLocalSymbolRequest(document.getText(), document.offsetAt(position))) {
+          return null;
+        }
+        return withEnglishErrors(() => next(document, position, newName, token));
       },
     },
     synchronize: {

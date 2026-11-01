@@ -26,9 +26,11 @@ As of this repository state, KoppaJS has:
 - first convention-based component API extraction for prop completions and hover summaries
 - published shared packages for `@koppajs/koppajs-language-core`, `@koppajs/koppajs-language-server`, and `@koppajs/koppajs-kpa-check`
 - a shared language-core surface for diagnostics, component resolution, semantic navigation, and workspace symbol extraction
-- extension runtime wiring to the published language server package
-- an internal workspace graph with cached discovery and dependency-aware invalidation
-- component call-site diagnostics plus safe quick fixes for missing required props, required slots, unknown emits, and unresolved imports
+- explicit provider ownership: shared runtime/markup/document-symbol services plus
+  local legacy, reference/rename, quick-fix and empty-window workspace-symbol adapters
+- a shared dependency-aware workspace graph plus a retained local cached workspace index
+- component call-site diagnostics for props, required slots, unknown emits, and unresolved imports
+- safe local quick fixes for required props, unresolved component imports and required named/default slots, plus explicit removal of unknown emit bindings
 - workspace-aware component references and rename across importer documents
 - workspace symbols for `.kpa` components and exported script symbols
 - an LSP-driven semantic client path for completions, diagnostics, hover, definition, references, rename, quick fixes, and symbol search
@@ -55,9 +57,11 @@ The intended long-term shape is:
 - the VS Code extension becomes a thin presentation client over shared language
   services
 
-This repository should only remain the place for core language infrastructure
-until there is real duplication pressure. Extraction should happen only when at
-least two consumers need the same semantics.
+The shared language packages already serve the language server and CLI. The
+following stages retain the original migration sequence, not a claim that
+extraction is still wholly future. Local compatibility implementations remain
+registered alongside the shared server; a fully thin client is a target, not
+the complete current architecture.
 
 ## Stage 1: Language Foundation Inside the Extension Repo
 
@@ -154,7 +158,8 @@ This repository then narrows to:
 
 ### Exit Criteria
 
-- VS Code diagnostics and CLI diagnostics are produced by the same semantic rules
+- shared-server diagnostics and CLI diagnostics use the same semantic rules;
+  extension-local legacy `{...}` missing-binding warnings remain an explicit exception
 - the parser and semantic engine are no longer owned only by the extension
 - go-to-definition, hover, and document symbols work for core `.kpa` constructs
 - the extension becomes a consumer of shared tooling rather than the owner of all logic
@@ -228,4 +233,4 @@ Do not prioritize these before the current shared-language layer is stable:
 - Keep governance documents in sync with real code structure after every architectural change.
 - Record major architecture decisions as ADRs instead of letting rationale stay implicit.
 - Re-run a repository-level meta-layer audit whenever module boundaries, workflows, or public behavior change.
-- When Stage 2 starts, add an ADR that explains why extraction is now justified by real reuse.
+- Record future extraction or local-adapter retirement decisions in new ADRs; preserve the historical context of existing ADRs.

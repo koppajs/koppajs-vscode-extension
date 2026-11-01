@@ -11,7 +11,7 @@ interface KpaProjectConfig {
 
 const projectConfigCache = new Map<string, KpaProjectConfig | null>();
 
-export interface ResolvedKpaProjectConfig extends KpaProjectConfig {}
+export type ResolvedKpaProjectConfig = KpaProjectConfig;
 
 export function resolveWorkspaceImportPath(
   importPath: string,

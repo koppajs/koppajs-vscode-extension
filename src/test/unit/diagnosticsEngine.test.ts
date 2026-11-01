@@ -2,6 +2,19 @@ import { describe, expect, it } from 'vitest';
 import { collectBlockDiagnostics } from '../../diagnosticsEngine';
 
 describe('collectBlockDiagnostics', () => {
+  it('leaves runtime interpolation binding diagnostics to the shared server', () => {
+    const text = [
+      '[template]',
+      '<p>{{title}} {{missing}}</p>',
+      '[/template]',
+      '[js]',
+      "return { props: { title: { type: String, default: 'Title' } } };",
+      '[/js]',
+    ].join('\n');
+
+    expect(collectBlockDiagnostics(text)).toEqual([]);
+  });
+
   it('returns no diagnostics for a well-formed document', () => {
     const text = [
       '[template]',
@@ -20,7 +33,9 @@ describe('collectBlockDiagnostics', () => {
     const text = '[/template]';
     const [diagnostic] = collectBlockDiagnostics(text);
 
-    expect(diagnostic?.message).toContain('ohne dass er vorher geoeffnet wurde');
+    expect(diagnostic?.message).toBe(
+      'Closing block [/template] found without a matching opening block.',
+    );
     expect(diagnostic?.range).toEqual({
       line: 0,
       startChar: 0,
@@ -32,16 +47,16 @@ describe('collectBlockDiagnostics', () => {
     const text = ['[template]', '[/css]'].join('\n');
     const [diagnostic] = collectBlockDiagnostics(text);
 
-    expect(diagnostic?.message).toContain('Stattdessen [/css] verwendet');
+    expect(diagnostic?.message).toBe(
+      'Expected closing block [/template] was not found. Found [/css] instead.',
+    );
   });
 
   it('flags unclosed blocks with the expected closing tag text', () => {
     const text = '[template]\n  <div>';
     const [diagnostic] = collectBlockDiagnostics(text);
 
-    expect(diagnostic?.message).toBe(
-      'Der Block [template] wurde nicht geschlossen. Erwartet [/template].',
-    );
+    expect(diagnostic?.message).toBe('Block [template] was not closed. Expected [/template].');
   });
 
   it('ignores unknown block names', () => {
@@ -60,14 +75,16 @@ describe('collectBlockDiagnostics', () => {
     const text = ['[layout]', '[/template]'].join('\n');
     const [diagnostic] = collectBlockDiagnostics(text);
 
-    expect(diagnostic?.message).toContain('ohne dass er vorher geoeffnet wurde');
+    expect(diagnostic?.message).toBe(
+      'Closing block [/template] found without a matching opening block.',
+    );
   });
 
   it('flags missing local template symbols in simple canonical expressions', () => {
     const text = ['[template]', '  <div>{missing}</div>', '[/template]'].join('\n');
     const [diagnostic] = collectBlockDiagnostics(text);
 
-    expect(diagnostic?.message).toBe('Lokales Template-Symbol [missing] wurde nicht gefunden.');
+    expect(diagnostic?.message).toBe('Local template symbol [missing] was not found.');
     expect(diagnostic?.range).toEqual({
       line: 1,
       startChar: 8,
@@ -102,7 +119,7 @@ describe('collectBlockDiagnostics', () => {
     ].join('\n');
     const [diagnostic] = collectBlockDiagnostics(text);
 
-    expect(diagnostic?.message).toBe('Lokales Template-Symbol [missing] wurde nicht gefunden.');
+    expect(diagnostic?.message).toBe('Local template symbol [missing] was not found.');
   });
 
   it('avoids warning on identifiers inside nested function scopes in template expressions', () => {

@@ -1,403 +1,398 @@
 /* ------------------------------------------------------------------------------
  * htmlAttributes.ts
  *
- * Exportiert ein Array von häufig genutzten HTML-Attributen, die in <tag ...>
- * vorgeschlagen werden sollen.
+ * Exports an array of commonly used HTML attributes to suggest
+ * inside <tag ...>.
  * ----------------------------------------------------------------------------*/
 
 export const htmlAttributes = [
-  // Allgemeine Attribute (bereits vorhanden)
+  // General attributes (already present)
   {
     label: 'class',
     snippet: 'class="$0"',
-    documentation: 'Definiert eine oder mehrere Klassen für ein Element (CSS-Styling).',
+    documentation: 'Defines one or more classes for an element (CSS styling).',
   },
   {
     label: 'id',
     snippet: 'id="$0"',
-    documentation: 'Definiert eine eindeutige Kennung (ID) für ein Element.',
+    documentation: 'Defines a unique identifier (ID) for an element.',
   },
   {
     label: 'style',
     snippet: 'style="$0"',
-    documentation: 'Definiert Inline-CSS-Stile für ein Element.',
+    documentation: 'Defines inline CSS styles for an element.',
   },
   {
     label: 'title',
     snippet: 'title="$0"',
-    documentation: 'Zeigt einen Tooltip, wenn man mit der Maus über das Element fährt.',
+    documentation: 'Displays a tooltip when the pointer hovers over the element.',
   },
   {
     label: 'src',
     snippet: 'src="$0"',
-    documentation: 'Definiert die URL einer Ressource (z.B. <img>, <script>, <iframe>).',
+    documentation: 'Defines the URL of a resource (e.g. <img>, <script>, <iframe>).',
   },
   {
     label: 'alt',
     snippet: 'alt="$0"',
-    documentation: 'Alternativtext (wird angezeigt, falls das Bild nicht geladen werden kann).',
+    documentation: 'Alternative text (displayed if the image cannot be loaded).',
   },
   {
     label: 'href',
     snippet: 'href="$0"',
-    documentation: 'Definiert die Ziel-URL (z. B. bei <a>, <link>).',
+    documentation: 'Defines the target URL (e.g. for <a>, <link>).',
   },
   {
     label: 'type',
     snippet: 'type="$0"',
-    documentation: 'Legt den Typ eines Elements fest (z. B. <button type="button">).',
+    documentation: 'Sets the type of an element (e.g. <button type="button">).',
   },
   {
     label: 'name',
     snippet: 'name="$0"',
-    documentation: 'Definiert den Namen eines Elements (häufig in Formularen oder <map>).',
+    documentation: 'Defines the name of an element (often in forms or <map>).',
   },
   {
     label: 'value',
     snippet: 'value="$0"',
-    documentation: 'Der Wert eines Formular-Elements (<input>, <option>, etc.).',
+    documentation: 'The value of a form element (<input>, <option>, etc.).',
   },
   {
     label: 'placeholder',
     snippet: 'placeholder="$0"',
-    documentation: 'Hilfetext, der in einem leeren Eingabefeld angezeigt wird.',
+    documentation: 'Hint text displayed in an empty input field.',
   },
   {
     label: 'disabled',
     snippet: 'disabled',
-    documentation: 'Deaktiviert ein Eingabefeld, Button etc. (nicht anklickbar).',
+    documentation: 'Disables an input field, button, etc. (not clickable).',
   },
   {
     label: 'readonly',
     snippet: 'readonly',
-    documentation: 'Macht ein Eingabefeld nur lesbar, aber nicht änderbar.',
+    documentation: 'Makes an input field read-only, preventing changes.',
   },
   {
     label: 'required',
     snippet: 'required',
-    documentation: 'Markiert ein Feld als Pflichtfeld im Formular.',
+    documentation: 'Marks a field as required in a form.',
   },
   {
     label: 'checked',
     snippet: 'checked',
-    documentation: 'Aktiviert vorab ein Kontrollkästchen oder einen Radiobutton.',
+    documentation: 'Preselects a checkbox or radio button.',
   },
   {
     label: 'selected',
     snippet: 'selected',
-    documentation: 'Wählt eine <option> als Standardwert in einem <select> aus.',
+    documentation: 'Selects an <option> as the default value in a <select>.',
   },
   {
     label: 'multiple',
     snippet: 'multiple',
-    documentation: 'Erlaubt Mehrfachauswahl bei <select> oder <input type="file">.',
+    documentation: 'Allows multiple selections in <select> or <input type="file">.',
   },
   {
     label: 'autocomplete',
     snippet: 'autocomplete="$0"',
-    documentation: 'Legt fest, ob und wie der Browser Eingaben automatisch vervollständigt.',
+    documentation: 'Specifies whether and how the browser automatically completes input.',
   },
   {
     label: 'autofocus',
     snippet: 'autofocus',
-    documentation: 'Gibt dem Element direkt beim Laden der Seite den Fokus.',
+    documentation: 'Gives the element focus when the page loads.',
   },
   {
     label: 'min',
     snippet: 'min="$0"',
-    documentation: 'Kleinster möglicher Wert (z. B. für <input type="number">).',
+    documentation: 'The minimum allowed value (e.g. for <input type="number">).',
   },
   {
     label: 'max',
     snippet: 'max="$0"',
-    documentation: 'Größter möglicher Wert.',
+    documentation: 'The maximum allowed value.',
   },
   {
     label: 'step',
     snippet: 'step="$0"',
-    documentation: 'Größe der Wertänderung pro Schritt (bei Zahlen-Eingaben).',
+    documentation: 'The amount by which a value changes per step (for numeric inputs).',
   },
   {
     label: 'pattern',
     snippet: 'pattern="$0"',
-    documentation: 'RegEx, der Eingaben in <input> validiert.',
+    documentation: 'A regular expression that validates input in <input>.',
   },
   {
     label: 'accept',
     snippet: 'accept="$0"',
-    documentation: 'Legt Dateitypen für <input type="file"> fest (z. B. "image/*").',
+    documentation: 'Specifies file types for <input type="file"> (e.g. "image/*").',
   },
   {
     label: 'method',
     snippet: 'method="$0"',
-    documentation: 'HTTP-Methode (GET oder POST) für ein Formular.',
+    documentation: 'The HTTP method (GET or POST) for a form.',
   },
   {
     label: 'action',
     snippet: 'action="$0"',
-    documentation: 'URL, an die das Formular gesendet wird.',
+    documentation: 'The URL to which the form is submitted.',
   },
   {
     label: 'enctype',
     snippet: 'enctype="$0"',
-    documentation: 'Datenformat für das Senden eines Formulars (z.B. multipart/form-data).',
+    documentation: 'The data format used to submit a form (e.g. multipart/form-data).',
   },
   {
     label: 'aria-label',
     snippet: 'aria-label="$0"',
-    documentation: 'Beschreibender Text für Screenreader (Barrierefreiheit).',
+    documentation: 'Descriptive text for screen readers (accessibility).',
   },
   {
     label: 'aria-hidden',
     snippet: 'aria-hidden="$0"',
     documentation:
-      'Kennzeichnet, ob das Element assistiven Technologien verborgen ist (true/false).',
+      'Indicates whether the element is hidden from assistive technologies (true/false).',
   },
   {
     label: 'role',
     snippet: 'role="$0"',
-    documentation: 'Gibt eine semantische Rolle für das Element an.',
+    documentation: 'Specifies a semantic role for the element.',
   },
   {
     label: 'tabindex',
     snippet: 'tabindex="$0"',
-    documentation: 'Position in der Tabulator-Reihenfolge für Tastaturbedienung.',
+    documentation: 'The position in the tab order for keyboard navigation.',
   },
   {
     label: 'data-$1',
     snippet: 'data-${1:attribute}="$0"',
-    documentation: 'Benutzerdefiniertes Datensatz-Attribut (z. B. data-info="...").',
+    documentation: 'A custom data attribute (e.g. data-info="...").',
   },
 
   // ---------------------------------------
-  //          EVENT-HANDLER
+  //          EVENT HANDLERS
   // ---------------------------------------
 
-  // Maus-Events
+  // Mouse events
   {
     label: 'onclick',
     snippet: 'onclick="$0"',
-    documentation: 'Wird ausgelöst, wenn auf ein Element geklickt wird.',
+    documentation: 'Fires when an element is clicked.',
   },
   {
     label: 'ondblclick',
     snippet: 'ondblclick="$0"',
-    documentation: 'Wird bei einem Doppelklick auf das Element ausgelöst.',
+    documentation: 'Fires when the element is double-clicked.',
   },
   {
     label: 'onmousedown',
     snippet: 'onmousedown="$0"',
-    documentation: 'Feuert, wenn eine Maustaste gedrückt wird.',
+    documentation: 'Fires when a mouse button is pressed.',
   },
   {
     label: 'onmouseup',
     snippet: 'onmouseup="$0"',
-    documentation: 'Feuert, wenn eine Maustaste losgelassen wird.',
+    documentation: 'Fires when a mouse button is released.',
   },
   {
     label: 'onmousemove',
     snippet: 'onmousemove="$0"',
-    documentation: 'Feuert kontinuierlich bei Mausbewegungen über ein Element.',
+    documentation: 'Fires continuously as the pointer moves over an element.',
   },
   {
     label: 'onmouseover',
     snippet: 'onmouseover="$0"',
-    documentation: 'Feuert, wenn der Mauszeiger über das Element geht.',
+    documentation: 'Fires when the pointer moves over the element.',
   },
   {
     label: 'onmouseout',
     snippet: 'onmouseout="$0"',
-    documentation: 'Feuert, wenn der Mauszeiger das Element verlässt.',
+    documentation: 'Fires when the pointer leaves the element.',
   },
   {
     label: 'onwheel',
     snippet: 'onwheel="$0"',
-    documentation: 'Feuert, wenn sich das Mausrad oder ein ähnliches Eingabegerät bewegt.',
+    documentation: 'Fires when the mouse wheel or a similar input device moves.',
   },
-  // Tastatur-Events
+  // Keyboard events
   {
     label: 'onkeydown',
     snippet: 'onkeydown="$0"',
-    documentation: 'Wird ausgelöst, wenn eine Taste gedrückt wird.',
+    documentation: 'Fires when a key is pressed.',
   },
   {
     label: 'onkeypress',
     snippet: 'onkeypress="$0"',
-    documentation: 'Feuert, wenn eine Taste gedrückt wurde und ein Zeichencode generiert wird.',
+    documentation: 'Fires when a key is pressed and a character code is generated.',
   },
   {
     label: 'onkeyup',
     snippet: 'onkeyup="$0"',
-    documentation: 'Feuert, wenn eine Taste losgelassen wird.',
+    documentation: 'Fires when a key is released.',
   },
 
-  // Fokus-Events
+  // Focus events
   {
     label: 'onfocus',
     snippet: 'onfocus="$0"',
-    documentation: 'Wird aufgerufen, wenn das Element den Fokus erhält.',
+    documentation: 'Fires when the element receives focus.',
   },
   {
     label: 'onblur',
     snippet: 'onblur="$0"',
-    documentation: 'Feuert, wenn das Element den Fokus verliert.',
+    documentation: 'Fires when the element loses focus.',
   },
 
-  // Clipboard-Events
+  // Clipboard events
   {
     label: 'oncopy',
     snippet: 'oncopy="$0"',
-    documentation: 'Wird ausgelöst, wenn Text in die Zwischenablage kopiert wird.',
+    documentation: 'Fires when text is copied to the clipboard.',
   },
   {
     label: 'oncut',
     snippet: 'oncut="$0"',
-    documentation: 'Wird ausgelöst, wenn Text ausgeschnitten wird.',
+    documentation: 'Fires when text is cut.',
   },
   {
     label: 'onpaste',
     snippet: 'onpaste="$0"',
-    documentation: 'Wird ausgelöst, wenn Inhalte in das Element eingefügt werden.',
+    documentation: 'Fires when content is pasted into the element.',
   },
 
-  // Drag&Drop-Events
+  // Drag-and-drop events
   {
     label: 'ondrag',
     snippet: 'ondrag="$0"',
-    documentation: 'Feuert kontinuierlich, während ein Element gezogen wird.',
+    documentation: 'Fires continuously while an element is dragged.',
   },
   {
     label: 'ondragstart',
     snippet: 'ondragstart="$0"',
-    documentation: 'Startet, wenn der Benutzer beginnt, ein Element zu ziehen.',
+    documentation: 'Starts when the user begins dragging an element.',
   },
   {
     label: 'ondragenter',
     snippet: 'ondragenter="$0"',
-    documentation: 'Ausgelöst, wenn ein Element in einen Drop-Bereich kommt.',
+    documentation: 'Fires when an element enters a drop area.',
   },
   {
     label: 'ondragover',
     snippet: 'ondragover="$0"',
-    documentation:
-      'Feuert kontinuierlich, während ein Element über einem Drop-Bereich gezogen wird.',
+    documentation: 'Fires continuously while an element is dragged over a drop area.',
   },
   {
     label: 'ondragleave',
     snippet: 'ondragleave="$0"',
-    documentation: 'Feuert, wenn ein Element den Drop-Bereich verlässt.',
+    documentation: 'Fires when an element leaves the drop area.',
   },
   {
     label: 'ondragend',
     snippet: 'ondragend="$0"',
-    documentation: 'Feuert, wenn das Ziehen (Drag) eines Elements beendet ist.',
+    documentation: 'Fires when dragging an element ends.',
   },
   {
     label: 'ondrop',
     snippet: 'ondrop="$0"',
-    documentation: 'Wird aufgerufen, wenn das gezogene Element fallen gelassen wird (Drop).',
+    documentation: 'Fires when the dragged element is dropped.',
   },
 
-  // Form-Events
+  // Form events
   {
     label: 'onchange',
     snippet: 'onchange="$0"',
-    documentation: 'Ausgelöst, wenn sich der Wert eines Elements ändert (z. B. <select>, <input>).',
+    documentation: 'Fires when the value of an element changes (e.g. <select>, <input>).',
   },
   {
     label: 'oninput',
     snippet: 'oninput="$0"',
-    documentation:
-      'Wird ausgelöst, sobald sich der Wert eines Elements ändert, während der Eingabe.',
+    documentation: 'Fires as soon as the value of an element changes during input.',
   },
   {
     label: 'oninvalid',
     snippet: 'oninvalid="$0"',
-    documentation: 'Feuert, wenn ein Formularfeld ungültig ist.',
+    documentation: 'Fires when a form field is invalid.',
   },
   {
     label: 'onreset',
     snippet: 'onreset="$0"',
-    documentation: 'Wird aufgerufen, wenn ein Formular zurückgesetzt wird (<form onreset>).',
+    documentation: 'Fires when a form is reset (<form onreset>).',
   },
   {
     label: 'onsearch',
     snippet: 'onsearch="$0"',
-    documentation:
-      'Ausgelöst, wenn in einem Suchfeld (<input type="search">) die Suche bestätigt wird.',
+    documentation: 'Fires when a search is confirmed in a search field (<input type="search">).',
   },
   {
     label: 'onselect',
     snippet: 'onselect="$0"',
-    documentation: 'Feuert, wenn der Benutzer Text in einem Eingabefeld markiert.',
+    documentation: 'Fires when the user selects text in an input field.',
   },
   {
     label: 'onsubmit',
     snippet: 'onsubmit="$0"',
-    documentation: 'Wird ausgelöst, wenn ein Formular gesendet wird.',
+    documentation: 'Fires when a form is submitted.',
   },
 
-  // Sonstige Events (Page, Media etc.)
+  // Other events (page, media, etc.)
   {
     label: 'onscroll',
     snippet: 'onscroll="$0"',
-    documentation: 'Feuert, wenn ein Element gescrollt wird.',
+    documentation: 'Fires when an element is scrolled.',
   },
   {
     label: 'onresize',
     snippet: 'onresize="$0"',
-    documentation: 'Ausgelöst, wenn die Größe des Fensters/eines Elements geändert wird.',
+    documentation: 'Fires when a window or element is resized.',
   },
   {
     label: 'onload',
     snippet: 'onload="$0"',
-    documentation:
-      'Wird aufgerufen, wenn ein Element (z. B. <body>, <iframe>, <img>) vollständig geladen ist.',
+    documentation: 'Fires when an element (e.g. <body>, <iframe>, <img>) has fully loaded.',
   },
   {
     label: 'onerror',
     snippet: 'onerror="$0"',
-    documentation:
-      'Feuert, wenn ein Fehler während des Ladens auftritt (z. B. Bild nicht gefunden).',
+    documentation: 'Fires when an error occurs during loading (e.g. image not found).',
   },
   {
     label: 'onbeforeunload',
     snippet: 'onbeforeunload="$0"',
-    documentation: 'Ausgelöst, bevor die Seite verlassen wird (z. B. Warnung bei Änderungen).',
+    documentation: 'Fires before leaving the page (e.g. a warning about changes).',
   },
   {
     label: 'onhashchange',
     snippet: 'onhashchange="$0"',
-    documentation: 'Feuert, wenn sich der Teil der URL nach dem # ändert.',
+    documentation: 'Fires when the part of the URL after # changes.',
   },
   {
     label: 'onpopstate',
     snippet: 'onpopstate="$0"',
-    documentation: 'Wird aufgerufen, wenn das aktive Verlaufseintrag (History-API) wechselt.',
+    documentation: 'Fires when the active history entry (History API) changes.',
   },
   {
     label: 'oncanplay',
     snippet: 'oncanplay="$0"',
-    documentation: 'Media-Event, wenn genug Daten geladen sind, um Medien abspielen zu können.',
+    documentation: 'A media event that fires when enough data has loaded to play the media.',
   },
   {
     label: 'onplay',
     snippet: 'onplay="$0"',
-    documentation: 'Wird aufgerufen, wenn die Wiedergabe eines Videos/Audios beginnt.',
+    documentation: 'Fires when video or audio playback starts.',
   },
   {
     label: 'onpause',
     snippet: 'onpause="$0"',
-    documentation: 'Wird ausgelöst, wenn ein Video/Audio pausiert wird.',
+    documentation: 'Fires when video or audio playback is paused.',
   },
   {
     label: 'onended',
     snippet: 'onended="$0"',
-    documentation: 'Media-Event, wenn ein Video/Audio zu Ende ist.',
+    documentation: 'A media event that fires when a video or audio ends.',
   },
   {
     label: 'onvolumechange',
     snippet: 'onvolumechange="$0"',
-    documentation: 'Feuert, wenn sich die Lautstärke oder Stummschaltung ändert.',
+    documentation: 'Fires when the volume or mute setting changes.',
   },
 ];

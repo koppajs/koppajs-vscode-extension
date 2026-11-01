@@ -1,5 +1,18 @@
 # Language Tooling Plan
 
+## Reading Status
+
+This document preserves the original build ladder and migration recommendations.
+Sections labeled historical are not a current implementation backlog. Shared
+language-core, language-server, and kpa-check packages already exist. The actual
+extension is hybrid: `src/extension.ts` starts the shared server and still
+retains local block, legacy-expression, reference/rename and quick-fix adapters. The server owns markup/document-symbol services; workspace symbols use a local fallback only without workspace folders.
+Current `{{...}}` expressions use the returned controller contract through LSP;
+legacy `{...}` expressions retain local adapters and editor-only missing-binding
+warnings outside shared CLI parity. See [the architecture](../../ARCHITECTURE.md)
+and [the active editing spec](../specs/kpa-editing-core.md) for current contracts.
+Existing ADR contexts remain historical records and are not rewritten here.
+
 ## Purpose
 
 Define the concrete technical path from the current VS Code extension to the
@@ -24,7 +37,7 @@ This is not achievable with grammar files and static completion catalogs alone.
 
 ## Capability Ladder
 
-### Level 0: Current State
+### Implemented Baseline (Beyond the Original Level 0)
 
 Current repository behavior:
 
@@ -36,8 +49,8 @@ Current repository behavior:
 - imported `.kpa` component tag completions plus component-tag hover/definition for resolvable workspace imports
 - first extracted component API hints for props/emits/slots from supported `.kpa` conventions
 - published shared packages for `@koppajs/koppajs-language-core`, `@koppajs/koppajs-language-server`, and `@koppajs/koppajs-kpa-check`
-- an internal workspace graph that feeds component rename/references, symbol search, and CLI scanning with dependency-aware invalidation
-- local symbol completions and hover inside canonical template expressions
+- a shared dependency-aware workspace graph for server/CLI services, alongside a retained local workspace index for component and symbol providers
+- local symbol completions and hover inside legacy single-brace canonical template expressions
 - local missing-binding diagnostics and definition/document-symbol features for file-local bindings
 - workspace-aware component references/rename across importer documents
 - component call-site diagnostics plus safe quick fixes for missing required props and unresolved imports
@@ -47,9 +60,9 @@ Current repository behavior:
 
 Missing:
 
-- type model
-- full cross-file analysis and project-graph invalidation
-- deep semantic understanding of embedded TS/JS
+- a complete framework-wide type model beyond supported controller/component contracts
+- full project analysis beyond the existing dependency-aware importer graph
+- deeper semantic understanding beyond the current virtual TypeScript bridge
 - deep component semantics beyond current prop/slot/emit call-site checks and basic API extraction
 - formatter and auto-import flows on top of the shared language truth
 
@@ -154,7 +167,12 @@ Typed completions become much more useful only when the tooling can resolve:
 - external component metadata
 - neighboring `.kpa` modules
 
-## Recommended Build Order
+## Historical Recommended Build Order
+
+The sequence below records the incremental route and earlier status notes.
+Parser/symbol extraction, virtual TypeScript services, workspace graphs, and
+shared server/CLI extraction are already implemented to varying degrees; the
+old “build next” wording does not mean those foundations are absent today.
 
 ### Step 1: Parser and Document Model
 
@@ -262,7 +280,7 @@ Current status:
 - `@koppajs/koppajs-kpa-check` now ships as a published CLI package
 - the remaining gap is deeper framework-wide semantic contracts, not the absence of a shared server/CLI split
 
-## Suggested Internal API Shape
+## Historical Suggested Internal API Shape
 
 Stage 1 should aim for a small internal API, not a public package yet.
 
@@ -323,7 +341,13 @@ KoppaJS ecosystem:
 If those are not yet explicit in `koppajs-core` or ecosystem docs, they need to
 be defined before Stage 2 can succeed cleanly.
 
-## Immediate Recommendation
+## Historical Immediate Recommendation
+
+The recommendation below predates the implemented symbol model, virtual-file
+bridge, and published server/CLI split. It is retained for context, not as the
+next required work. Current follow-up scope is deeper framework-wide semantics
+and deliberate consolidation of the retained local adapters, not rebuilding
+these foundations.
 
 If the near-term goal is "show types and useful completions", the best next move
 is not to add more static completion providers.

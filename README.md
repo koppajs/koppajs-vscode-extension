@@ -70,11 +70,12 @@ compiler, or bundler.
 
 - Type: VS Code extension plugin
 - Runtime responsibility: register `.kpa` language support and host the VS Code
-  client surface over the shared KoppaJS language server
+  client surface over the shared KoppaJS language server, alongside retained
+  local legacy, reference/rename, quick-fix and empty-window workspace-symbol adapters
 - Build-time responsibility: bundle the extension, compile integration tests,
   consume the published KoppaJS language tooling packages, and validate repository quality gates
 - UI surface: no standalone UI; the only product surface is the VS Code editor
-- Maturity: pre-1.0, narrow in scope, with explicit governance and specs
+- Maturity: 1.x release candidate, narrow in scope, with explicit governance and specs
 
 ---
 
@@ -84,22 +85,22 @@ This repository owns:
 
 - `.kpa` language registration and grammar wiring
 - editor completions for KoppaJS block insertion
-- LSP-backed HTML tag and attribute completions in the canonical template block
+- HTML tag and attribute completions in the canonical template block, with local providers retained alongside the LSP path
 - imported `.kpa` component tag completions inside the canonical template block
 - imported component-prop completions inside canonical opening tags
 - component call-site diagnostics for missing required props, unknown props, and simple literal type mismatches
 - local script-symbol completions plus typed member completions and hover in canonical template expressions
-- warning diagnostics for missing local template bindings in canonical template expressions
+- editor-only legacy warning diagnostics for missing local template bindings in canonical single-brace expressions
 - language-core-backed go-to-definition, find-references, rename, document symbols, and workspace symbols for `.kpa` structure
 - semantic go-to-definition and find-references for imported TypeScript symbols referenced from canonical template expressions
 - semantic go-to-definition, hover, find-references, and rename for imported `.kpa` component tags referenced from canonical template markup, including workspace-wide importer documents
 - quick fixes for missing required component props and unresolved component imports
-- published shared language packages `@koppajs/koppajs-language-core`,
+- integration with published shared language packages `@koppajs/koppajs-language-core`,
   `@koppajs/koppajs-language-server`, and `@koppajs/koppajs-kpa-check`
 - extension runtime wiring against the published language server package under
   `node_modules/`
-- an internal workspace graph with cached `.kpa` discovery and dependency-aware
-  invalidation for workspace features
+- shared dependency-aware workspace graph services plus a retained local workspace
+  index for compatibility providers
 - warning diagnostics for malformed canonical block structure
 - warning diagnostics for unresolved PascalCase component tags and broken explicit `.kpa` component imports
 
@@ -113,6 +114,12 @@ This repository does not own:
 ---
 
 ## Public Contract
+
+The extension UI, diagnostic messages, completion descriptions, quick-fix titles,
+logs, and repository examples use English, regardless of the VS Code display
+language. The repository `npm run kpa:check -- [options] [targets...]` command
+also presents shared CLI output in English. User content and identifiers stay
+unchanged.
 
 The supported editor contract is intentionally small:
 
@@ -131,7 +138,7 @@ The supported editor contract is intentionally small:
   props, missing required slots, unknown props, unknown emit handlers, and
   TS-backed or heuristic prop type mismatches
 - local template-visible top-level bindings from `[ts]` and `[js]` are offered
-  as completion items inside `{...}` expressions within canonical `[template]`
+  as completion items inside legacy `{...}` expressions within canonical `[template]`
 - typed member completions for local template-visible bindings are offered inside
   canonical template expressions
 - hover inside canonical template expressions can describe local
@@ -146,29 +153,36 @@ The supported editor contract is intentionally small:
   slots from the imported component when available
 - canonical template component tags support references and rename together with
   their imported script alias across workspace importer documents
-- hover, go-to-definition, references, rename, document symbols, and workspace
-  symbols are served through the shared `@koppajs/koppajs-language-server`
 - local top-level bindings from `[ts]` and `[js]` support find-references and
   rename across canonical template expressions plus local script usage
 - unresolved component tags can offer an import quick fix, and missing required
-  props can offer an insertion quick fix
+  props can offer a runtime-compatible binding insertion
+- missing required slots can offer a stub insertion without discarding component
+  content; unknown emit handlers can offer explicit removal of only that attribute
 - imported TypeScript bindings referenced from canonical template expressions
   can contribute semantic cross-file reference results
-- semantic completions, diagnostics, hover, go-to-definition, references,
-  rename, document symbols, workspace symbols, and quick fixes are served
-  through the shared `@koppajs/koppajs-language-server`; top-level block snippets
-  remain a thin extension-local adapter
+- the shared `@koppajs/koppajs-language-server` serves runtime expressions,
+  HTML/component completions, component hover/definition and document symbols;
+  local adapters retain block snippets, legacy expressions, reference/rename
+  mappings and safe component quick fixes without duplicate server results
+- workspace symbols are server-owned in project folders and use the local index
+  for open files when no workspace folder is present
 - renaming an imported binding from a canonical template expression currently
   renames the local import alias and same-file usages, not the exported source
   declaration in another file
 - document symbols expose parsed blocks and local top-level script bindings, and
   workspace symbols expose `.kpa` components plus exported script symbols
 - `npm run kpa:check -- <path>` can run the same diagnostics core from the CLI
-- missing local bindings inside canonical template expressions emit warning diagnostics
+- missing local bindings inside legacy `{...}` template expressions emit local warning diagnostics
 - unresolved PascalCase component tags and broken explicit `.kpa` imports emit
   warning diagnostics
-- warning diagnostics are emitted only for malformed canonical blocks
-  recognized by the diagnostics engine
+- warnings cover canonical block structure, runtime bindings, component
+  imports/call sites, and legacy missing bindings; they are not block-only
+
+Current runtime interpolations use `{{...}}` and the explicit returned controller
+contract. The shared language server handles their completions, diagnostics,
+hover, and navigation. Legacy single-brace `{...}` expressions retain their
+existing local editor adapters; those adapters do not override runtime interpolations.
 
 Current block behavior:
 
@@ -181,6 +195,13 @@ top-level block insertion inside the alias block, but they are outside the
 canonical template intelligence contract. Local symbol intelligence and runtime
 block diagnostics are not guaranteed there.
 
+Client file-operation filters use minimatch 11 matching: negative extglobs with
+suffixes follow Bash-style semantics, and case-insensitive filters use Unicode
+case folding. Diagnostic/notebook glob selectors keep extglob expansion disabled.
+The bundled language server currently does not advertise these optional features;
+the exact compatibility boundary is documented in
+[the dependency spec](docs/specs/dependency-compatibility.md).
+
 Current workspace-aware component support:
 
 - imported `.kpa` components are resolved through relative or absolute paths and
@@ -192,7 +213,7 @@ Current workspace-aware component support:
   workspace for resolved `.kpa` components
 - missing required props can be inserted through quick fixes, and unresolved
   component tags can offer a matching import quick fix when a unique workspace
-  candidate exists
+  candidate can be selected unambiguously (a sole or uniquely best-ranked match)
 - props, slots, and emits are modeled from supported `Props`/`Slots`/`Emits`
   contracts, including required-slot and unknown-emit checks at call sites
 - deeper project-wide TS-backed component analysis is still future work
@@ -207,12 +228,12 @@ structure:
 ```plaintext
 [template]
   <div class="card">
-    <p>{message}</p>
+    <p>{{message}}</p>
   </div>
 [/template]
 
 [ts]
-  const message = 'Hello TypeScript';
+  return { state: { message: 'Hello TypeScript' } };
 [/ts]
 
 [css]
@@ -225,6 +246,9 @@ structure:
 ---
 
 ## Installation
+
+Requires VS Code 1.144.0 or newer. Repository development requires Node.js
+`^22.22.1 || ^24.0.0 || >=26.0.0` and npm 10 or newer.
 
 Supported paths:
 
@@ -243,13 +267,24 @@ convenience command:
 
 - `npm run kpa:check -- path/to/file-or-folder`
 
-This uses the same parser, diagnostics, and workspace-graph layer as the
-extension. The root convenience command delegates directly to the published CLI
-artifact under `node_modules/@koppajs/koppajs-kpa-check/dist/cli.js`.
+This uses the shared parser, diagnostics, and workspace-graph layer also consumed
+by the language server. The root convenience command calls the published CLI
+through `scripts/kpa-check.mjs`, which translates known messages to English
+without changing options, diagnostic metadata, JSON structure, or exit codes.
+Direct invocation of the upstream CLI retains its original language.
+CLI parity applies to that shared path, not every editor warning: the extension
+additionally emits local legacy `{...}` missing-binding warnings through
+`src/diagnostics.ts`. Those warnings are an editor-only compatibility exception;
+current `{{...}}` binding diagnostics belong to the shared server.
 
 ---
 
 ## Ecosystem Fit
+
+The pinned compatibility baseline is Core 3.0.12, Router 0.1.9, Vite plugin
+2.0.1, and language-core/kpa-check 0.2.2 and language-server 0.2.1.
+`npm run test:ecosystem` checks a production build and CLI diagnostics; Core,
+Router, and the plugin are development-only dependencies, not extension runtime dependencies.
 
 This extension complements the rest of the KoppaJS ecosystem:
 

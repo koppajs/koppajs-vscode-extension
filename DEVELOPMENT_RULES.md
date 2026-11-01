@@ -2,9 +2,13 @@
 
 ## Default Style
 
+- Write extension UI text, diagnostics, errors, logs, comments, documentation, and examples in English. Preserve user-authored content and technical identifiers. German text is permitted only in the shared-package compatibility patterns and regression fixtures that exercise them.
+
 - Prefer small, explicit TypeScript modules over broad abstractions.
 - Favor functions and plain objects over classes unless a VS Code API requires otherwise.
 - Keep data modules declarative and side-effect free.
+- Keep local `.diffuno` workspace metadata outside formatting, linting, and the
+  published VSIX. Do not rewrite task-board files to satisfy code quality gates.
 - Keep comments focused on intent, invariants, or non-obvious behavior.
 
 ## Dependency Rules
@@ -19,6 +23,7 @@
 
 - Keep runtime registration centralized in `src/extension.ts`.
 - Do not introduce hidden side effects at module import time.
+- Dependency security adaptations must be explicit lifecycle scripts, version/source guarded, idempotent and covered by actual consumer tests. Do not bypass the language-client preparation guards or silently broaden scoped overrides.
 - Do not create new block aliases without documenting canonical behavior in specs and ADRs.
 - If a helper becomes central to diagnostics or provider behavior, make it testable in isolation.
 

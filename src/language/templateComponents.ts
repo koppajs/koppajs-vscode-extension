@@ -359,7 +359,7 @@ export function normalizeComponentRenameTarget(
 
   if (!/^[A-Za-z_$][\w$]*$/.test(symbolName)) {
     throw new Error(
-      `Komponentenname [${requestedName}] ist ungueltig. Erwartet wird ein gueltiger Bezeichner oder Kebab-Case.`,
+      `Component name [${requestedName}] is invalid. Expected a valid identifier or kebab-case.`,
     );
   }
 
@@ -414,7 +414,7 @@ export function collectCanonicalTemplateComponentDiagnostics(
 
     diagnostics.push({
       code: kpaDiagnosticCodes.unresolvedComponentImport,
-      message: `Komponenten-Import [${component.name}] verweist auf [${component.importPath}], konnte aber nicht im Workspace aufgeloest werden.`,
+      message: `Component import [${component.name}] points to [${component.importPath}] but could not be resolved in the workspace.`,
       range: toDiagnosticRange(component.importRange),
     });
   }
@@ -430,7 +430,7 @@ export function collectCanonicalTemplateComponentDiagnostics(
         componentName: tag.name.includes('-') ? toPascalCase(tag.name) : tag.name,
         tagName: tag.name,
       } satisfies UnresolvedComponentTagDiagnosticData,
-      message: `Komponente [${tag.name}] wurde im [template]-Block verwendet, aber nicht als .kpa-Import gefunden.`,
+      message: `Component [${tag.name}] was used in the [template] block but was not found as a .kpa import.`,
       range: toDiagnosticRange(tag.range),
     });
   }
@@ -464,7 +464,7 @@ export function collectCanonicalTemplateComponentDiagnostics(
         if (shouldWarnUnknownComponentAttribute(attribute.name)) {
           diagnostics.push({
             code: kpaDiagnosticCodes.unknownComponentProp,
-            message: `Attribut [${attribute.name}] ist kein bekanntes Prop von Komponente [${callSite.component.name}].`,
+            message: `Attribute [${attribute.name}] is not a known prop of component [${callSite.component.name}].`,
             range: toDiagnosticRange(attribute.range),
           });
         }
@@ -487,10 +487,10 @@ export function collectCanonicalTemplateComponentDiagnostics(
       ) {
         diagnostics.push({
           code: kpaDiagnosticCodes.invalidComponentPropType,
-          message: `Prop [${prop.name}] an Komponente [${callSite.component.name}] erwartet [${prop.typeText}], erhalten wurde [${
+          message: `Prop [${prop.name}] on component [${callSite.component.name}] expects [${prop.typeText}], received [${
             attribute.kind === 'expression'
-              ? attribute.valueText?.trim() || 'Ausdruck'
-              : (inferredValueType ?? 'unbekannt')
+              ? attribute.valueText?.trim() || 'expression'
+              : (inferredValueType ?? 'unknown')
           }].`,
           range: toDiagnosticRange(attribute.range),
         });
@@ -509,7 +509,7 @@ export function collectCanonicalTemplateComponentDiagnostics(
 
         diagnostics.push({
           code: kpaDiagnosticCodes.unknownComponentEmit,
-          message: `Event-Handler [${attribute.name}] verweist auf unbekanntes Emit [${emitName}] von Komponente [${callSite.component.name}].`,
+          message: `Event handler [${attribute.name}] references unknown emit [${emitName}] of component [${callSite.component.name}].`,
           range: toDiagnosticRange(attribute.range),
         });
       }
@@ -530,7 +530,7 @@ export function collectCanonicalTemplateComponentDiagnostics(
 
         diagnostics.push({
           code: kpaDiagnosticCodes.unknownComponentSlot,
-          message: `Slot [${slotUsage.name}] ist kein bekannter Slot von Komponente [${callSite.component.name}].`,
+          message: `Slot [${slotUsage.name}] is not a known slot of component [${callSite.component.name}].`,
           range: toDiagnosticRange(slotUsage.range),
         });
       }
@@ -542,7 +542,7 @@ export function collectCanonicalTemplateComponentDiagnostics(
 
         diagnostics.push({
           code: kpaDiagnosticCodes.missingComponentSlot,
-          message: `Required Slot [${requiredSlot.name}] fehlt an Komponente [${callSite.component.name}].`,
+          message: `Required slot [${requiredSlot.name}] is missing on component [${callSite.component.name}].`,
           range: toDiagnosticRange(callSite.tag.range),
         });
       }
@@ -565,7 +565,7 @@ export function collectCanonicalTemplateComponentDiagnostics(
           propName: requiredProp.name,
           propTypeText: requiredProp.typeText,
         } satisfies MissingComponentPropDiagnosticData,
-        message: `Required Prop [${requiredProp.name}] fehlt an Komponente [${callSite.component.name}].`,
+        message: `Required prop [${requiredProp.name}] is missing on component [${callSite.component.name}].`,
         range: toDiagnosticRange(callSite.tag.range),
       });
     }

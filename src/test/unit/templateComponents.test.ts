@@ -65,14 +65,12 @@ describe('template components', () => {
 
     expect(
       diagnostics.some((diagnostic) =>
-        diagnostic.message.includes('Komponente [UserCard] wurde im [template]-Block verwendet'),
+        diagnostic.message.includes('Component [UserCard] was used in the [template] block'),
       ),
     ).toBe(true);
     expect(
       diagnostics.some((diagnostic) =>
-        diagnostic.message.includes(
-          'Komponenten-Import [MissingCard] verweist auf [./MissingCard.kpa]',
-        ),
+        diagnostic.message.includes('Component import [MissingCard] points to [./MissingCard.kpa]'),
       ),
     ).toBe(true);
   });
@@ -171,7 +169,7 @@ describe('template components', () => {
       (diagnostic) => diagnostic.code === kpaDiagnosticCodes.missingComponentProp,
     );
 
-    expect(missingPropDiagnostic?.message).toContain('Required Prop [title]');
+    expect(missingPropDiagnostic?.message).toContain('Required prop [title]');
     expect(missingPropDiagnostic?.data).toMatchObject({
       componentName: 'UserCard',
       propName: 'title',

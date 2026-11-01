@@ -11,24 +11,17 @@ const invalidFilePath = path.join(invalidDirectory, 'Invalid.kpa');
 fs.writeFileSync(validFilePath, ['[template]', '  <div></div>', '[/template]'].join('\n'));
 fs.writeFileSync(invalidFilePath, ['[template]', '  <UserCard />', '[/template]'].join('\n'));
 
-const cliPath = path.join(
-  process.cwd(),
-  'node_modules',
-  '@koppajs',
-  'koppajs-kpa-check',
-  'dist',
-  'cli.js',
-);
+const cliPath = path.join(process.cwd(), 'scripts', 'kpa-check.mjs');
 
 const validRun = spawnSync(process.execPath, [cliPath, validFilePath], {
   cwd: process.cwd(),
   encoding: 'utf8',
 });
 
-if (validRun.status !== 0 || !validRun.stdout.includes('keine Diagnostics gefunden')) {
+if (validRun.status !== 0 || !validRun.stdout.includes('no diagnostics found')) {
   console.error(validRun.stdout);
   console.error(validRun.stderr);
-  throw new Error('kpa-check sollte fuer eine gueltige Datei erfolgreich sein.');
+  throw new Error('kpa-check should succeed for a valid file.');
 }
 
 const invalidRun = spawnSync(process.execPath, [cliPath, invalidFilePath], {
@@ -38,9 +31,9 @@ const invalidRun = spawnSync(process.execPath, [cliPath, invalidFilePath], {
 
 if (
   invalidRun.status !== 1 ||
-  !invalidRun.stdout.includes('Komponente [UserCard] wurde im [template]-Block verwendet')
+  !invalidRun.stdout.includes('Component [UserCard] was used in the [template] block')
 ) {
   console.error(invalidRun.stdout);
   console.error(invalidRun.stderr);
-  throw new Error('kpa-check sollte fuer eine fehlerhafte Datei Diagnostics liefern.');
+  throw new Error('kpa-check should report diagnostics for an invalid file.');
 }

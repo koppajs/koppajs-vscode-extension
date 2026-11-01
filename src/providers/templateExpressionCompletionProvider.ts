@@ -17,7 +17,7 @@ export function registerTemplateExpressionCompletionProvider(context: vscode.Ext
         const offset = document.offsetAt(position);
         const templateExpressionContext = getTemplateExpressionContext(text, offset);
 
-        if (!templateExpressionContext) {
+        if (!templateExpressionContext || templateExpressionContext.isRuntimeExpression) {
           return undefined;
         }
 

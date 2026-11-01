@@ -2,7 +2,7 @@
 <div class="top-bar box-shadow" ref="top-bar">
     <div class="logo">
         <a href="#">
-            <img src="/images/logo.png" alt="Logo" /> 
+            <img src="/images/logo.png" alt="Logo" />
         </a>
     </div>
 
@@ -13,7 +13,7 @@
             <li><a href="/home">Home</a></li>
             <li><a href="#">About</a></li>
             <li><a href="#">Contact</a></li>
-            <li><a href="/imprint">Impressum</a></li>
+            <li><a href="/imprint">Legal notice</a></li>
         </ul>
      </nav>
 
@@ -33,14 +33,14 @@
         </button>
     </div>
 </div>
-     
+
 <nav class="side-nav box-shadow" ref="side-nav">
     <div class="blur"></div>
     <ul>
         <li><a href="/home">Home</a></li>
         <li><a href="#">About</a></li>
         <li><a href="#">Contact</a></li>
-        <li><a href="/imprint">Impressum</a></li>
+        <li><a href="/imprint">Legal notice</a></li>
     </ul>
     <div onClick="closeMenu"></div>
 </nav>
@@ -220,7 +220,7 @@
                 nav.top-nav {
                     display: none;
                 }
-                
+
                 .toggle-nav {
                     display: block;
                 }

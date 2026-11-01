@@ -39,7 +39,7 @@ export function collectBlockDiagnosticsFromDocument(
           startChar: tag.range.start.character,
           endChar: tag.range.end.character,
         },
-        message: `Schliessender Block [/${tag.name}] gefunden, ohne dass er vorher geoeffnet wurde.`,
+        message: `Closing block [/${tag.name}] found without a matching opening block.`,
       });
       continue;
     }
@@ -51,7 +51,7 @@ export function collectBlockDiagnosticsFromDocument(
           startChar: tag.range.start.character,
           endChar: tag.range.end.character,
         },
-        message: `Erwarteter schliessender Block [/${lastOpenTag.name}] wurde nicht gefunden. Stattdessen [/${tag.name}] verwendet.`,
+        message: `Expected closing block [/${lastOpenTag.name}] was not found. Found [/${tag.name}] instead.`,
       });
       continue;
     }
@@ -72,7 +72,7 @@ export function collectBlockDiagnosticsFromDocument(
         startChar: unclosedTag.range.start.character,
         endChar: unclosedTag.range.end.character,
       },
-      message: `Der Block [${unclosedTag.name}] wurde nicht geschlossen. Erwartet [/${unclosedTag.name}].`,
+      message: `Block [${unclosedTag.name}] was not closed. Expected [/${unclosedTag.name}].`,
     });
   }
 

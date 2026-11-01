@@ -6,6 +6,9 @@ import { getWorkspaceIndex } from './workspaceIndexService';
 export function registerWorkspaceSymbolProvider(context: vscode.ExtensionContext) {
   const provider = vscode.languages.registerWorkspaceSymbolProvider({
     async provideWorkspaceSymbols(query) {
+      if (vscode.workspace.workspaceFolders?.length) {
+        return [];
+      }
       return getWorkspaceIndex()
         .collectWorkspaceSymbols(query)
         .map(

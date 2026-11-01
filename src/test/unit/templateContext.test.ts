@@ -16,6 +16,19 @@ describe('getCanonicalTemplateContext', () => {
 });
 
 describe('getTemplateExpressionContext', () => {
+  it('distinguishes runtime expressions from legacy expressions, including incomplete input', () => {
+    for (const expression of ['{{title}}', '{{title']) {
+      const text = '[template]\n<p>' + expression + '</p>\n[/template]';
+      const offset = text.indexOf('title') + 2;
+      expect(getTemplateExpressionContext(text, offset)?.isRuntimeExpression).toBe(true);
+      expect(isOffsetInsideTemplateExpression(text, offset)).toBe(true);
+    }
+    const legacy = '[template]\n<p>{title}</p>\n[/template]';
+    expect(
+      getTemplateExpressionContext(legacy, legacy.indexOf('title') + 2)?.isRuntimeExpression,
+    ).toBe(false);
+  });
+
   it('returns an expression context inside a text interpolation', () => {
     const text = '[template]\n  <div>{count}</div>\n[/template]';
     const offset = text.indexOf('{count}') + 2;

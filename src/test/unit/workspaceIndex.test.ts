@@ -53,7 +53,7 @@ describe('workspace index', () => {
       workspaceIndex
         .collectDiagnosticsForPaths([tempDirectory])
         .flatMap((entry) => entry.diagnostics)
-        .some((diagnostic) => diagnostic.message.includes('Lokales Template-Symbol [missing]')),
+        .some((diagnostic) => diagnostic.message.includes('Local template symbol [missing]')),
     ).toBe(true);
   });
 });

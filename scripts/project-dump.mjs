@@ -798,7 +798,7 @@ async function tryGitLsFiles() {
 // -------------------------
 async function walkFs(dir) {
   let result = [];
-  let entries = [];
+  let entries;
   try {
     entries = await fs.readdir(dir, { withFileTypes: true });
   } catch {

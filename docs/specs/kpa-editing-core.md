@@ -29,6 +29,11 @@ canonical blocks plus missing local template bindings.
 
 ## Outputs
 
+Single-brace `{...}` binding features below describe retained legacy editor
+compatibility. Current `{{...}}` runtime expressions use the returned controller
+contract described in “Current Runtime Interpolation Compatibility”; do not
+interpret legacy top-level script visibility as current runtime visibility.
+
 - Syntax highlighting based on `syntaxes/kpa.tmLanguage.json`
 - Block snippet completions outside known blocks
 - HTML tag completions in `[template]` after the `<` trigger character
@@ -36,7 +41,7 @@ canonical blocks plus missing local template bindings.
 - HTML attribute completions while editing an opening HTML tag inside `[template]`
 - Imported component-prop completion items while editing an opening tag for a resolved `.kpa` component in `[template]`
 - Warning diagnostics for missing required props, missing required slots, unknown props, unknown emits, and supported TS-backed or heuristic type mismatches on resolved imported component call sites
-- Quick fixes for unresolved component tags when a unique workspace import candidate exists
+- Quick fixes for unresolved component tags when an unambiguous workspace import candidate exists (a sole or uniquely best-ranked local candidate)
 - Quick fixes for missing required component props on resolved imported component call sites
 - Local completion items for template-visible top-level bindings from `[ts]` and `[js]` while editing `{...}` expressions inside `[template]`
 - Typed member completion items while editing member access on local template-visible bindings inside `{...}` expressions in `[template]`
@@ -89,8 +94,7 @@ canonical blocks plus missing local template bindings.
 10. Resolved imported component call sites can warn on missing required props,
     missing required slots, unknown props, unknown emit handlers, and supported
     TS-backed or heuristic type mismatches.
-11. Missing required props and unresolved component tags can offer quick fixes
-    when the edit is safe to construct from local workspace information.
+11. Missing required props, unresolved component tags, missing required named/default slots and unknown emit bindings can offer safe explicit quick fixes. Prop stubs use runtime binding syntax; slot fixes preserve content and can expand self-closing tags. Unknown emit fixes remove the exact handler attribute rather than guessing another event name.
 12. Inside a `{...}` expression within the canonical `[template]` block,
     template-visible top-level bindings from local `[ts]` and `[js]` blocks can
     appear as completion items.
@@ -132,17 +136,60 @@ canonical blocks plus missing local template bindings.
     they suppress top-level block insertion inside the alias block, but they do
     not receive canonical template local symbol intelligence, parser-backed
     navigation, or runtime block diagnostics.
-27. Diagnostics are emitted only for canonical runtime blocks handled by the
-    diagnostics engine.
+27. Warnings are not limited to block structure: the shared server emits
+    structural, runtime-binding, and component diagnostics. The local collection
+    adds legacy single-brace missing-binding warnings only.
+
+## English Language Contract
+
+All extension-owned descriptions, diagnostics, quick-fix titles, errors, logs,
+examples, and contributor-facing text use English. English is fixed and does not
+follow the VS Code display language. User-authored content, identifiers, paths,
+and public diagnostic codes are not translated.
+
+The pinned shared packages still emit some German text. The client adapts known
+shared diagnostics and rename errors to English at the presentation boundary and
+uses the English local HTML catalog for matching server completion snippets.
+This changes presentation only: the server remains the owner of those features.
+Unknown messages and semantic/user documentation pass through unchanged.
+Original German strings remain only as compatibility patterns and regression
+fixtures. Installed dependencies are not rewritten.
+
+Slot/emit quick fixes compare normalized English messages against recomputed
+shared diagnostics, preserving stale-diagnostic and foreign-source rejection.
+The repository `npm run kpa:check -- [options] [targets...]` command uses a thin
+English-output adapter over the published CLI. It preserves options, JSON
+metadata, target paths, diagnostic codes, and exit codes. Direct invocation of
+the upstream CLI outside this repository retains that package's language.
+
+## Current Runtime Interpolation Compatibility
+
+With language-core 0.2.1 and language-server 0.2.1, current `{{...}}` interpolations use the explicit
+returned controller contract (`state`, `methods`, `props`, and `events`).
+The shared language server owns binding diagnostics, completion, hover, definition,
+references, and rename for these expressions. Local single-brace adapters must
+not suppress server completions, expose private controller locals, or emit
+false missing-binding diagnostics for returned properties. Incomplete `{{...`
+input remains eligible for server completion. Existing single-brace `{...}`
+behavior described in this spec remains legacy editor compatibility, not a current runtime guarantee.
+HTML completions remain suppressed inside both expression forms.
+
+Validation includes the shared ecosystem fixture and a real-host regression
+that detects an unknown runtime binding, clears that warning for returned props,
+and completes returned state/props/methods without exposing a private local.
 
 ## Constraints
 
 - Diagnostics are warning-level only.
 - The extension does not perform automatic document repairs.
 - Full template-intelligence support is canonical for `[template]`, not for all grammar aliases.
-- The extension currently relies on local static completion catalogs instead of remote or generated metadata.
-- Semantic completions, diagnostics, quick fixes, hover, navigation, and symbol
-  search are LSP-backed; top-level block snippets remain extension-local.
+- Local HTML/block snippets use static catalogs; semantic and component suggestions also use parsed/type information.
+- Runtime expressions, HTML/component completions, component hover/definition and document symbols are server-owned. Local adapters retain block snippets, legacy expressions, reference/rename mappings and component quick fixes. Middleware and local guards use the same ownership rules to prevent duplicate responses. Workspace symbols use the server with workspace folders and the local index without folders.
+- `src/diagnostics.ts` publishes only uncoded legacy missing-binding messages
+  beginning `Local template symbol [` from the local diagnostics engine.
+  This editor-only compatibility collection is an explicit exception to CLI
+  parity; it skips current runtime `{{...}}` bindings.
+- Slot/emit repairs require a matching fresh shared diagnostic and an unambiguous current tag/attribute. Stale/foreign diagnostics, malformed markup or duplicate attributes produce no edit. No repair is applied automatically.
 - Local script-symbol intelligence is limited to file-local top-level bindings from `[ts]` and `[js]`.
 - Workspace-aware component resolution currently follows relative or absolute
   `.kpa` imports plus `tsconfig`/`jsconfig` `baseUrl` and `paths` aliases
@@ -157,10 +204,13 @@ canonical blocks plus missing local template bindings.
   slot, and emit diagnostics, workspace symbol exposure, and safe quick fixes,
   but it does not yet model a full framework-wide project graph or deeper
   project-wide TS-backed component semantics.
-- Local parser-backed rename still operates only on file-local bindings from `[ts]` and `[js]`, and imported-symbol rename is limited to the local import alias plus same-file usages.
+- Local legacy expression binding rename operates on file-local `[ts]`/`[js]` bindings; imported TypeScript binding rename stays on the local alias and same-file usages. Component tag/import-alias rename separately spans workspace importer documents.
 - Rename inside canonical template expressions is intentionally refused when multiple local declarations share the same visible name.
-- Missing-binding diagnostics currently target canonical template identifier references outside nested function/class scopes.
-- The extension does not yet provide framework-aware cross-file symbol resolution across neighboring `.kpa` files, component boundaries, or full semantic rename.
+- Local legacy missing-binding diagnostics target canonical template identifier references outside nested function/class scopes; current runtime binding checks belong to the server.
+- Cross-file component resolution, definition, references, and importer-alias/tag
+  rename already work for reachable `.kpa` imports. What remains absent is a
+  complete framework-aware project model and source-declaration rename across
+  component boundaries; importer rename does not rename the component source file.
 
 ## Edge Cases
 
@@ -174,7 +224,8 @@ canonical blocks plus missing local template bindings.
 - Missing required props on a resolved imported component call site should warn
   and offer an insertion quick fix.
 - Unresolved PascalCase component tags should offer an import quick fix when a
-  unique matching `.kpa` file exists in reachable workspace roots.
+  matching `.kpa` candidate is unambiguous in reachable workspace roots; the local
+  provider accepts a sole candidate or a uniquely best-ranked match, but not a tie.
 - Go-to-definition, hover, find-references, and local rename on an imported component tag should work on both its opening and closing tag names when the component resolves.
 - Hover on an imported component tag should surface extracted props, emits, and slots when the imported file exposes supported `Props`/`Emits`/`Slots` contracts.
 - Member access such as `user.` inside canonical template expressions should offer typed member completions when the local symbol type is known.
@@ -232,7 +283,7 @@ canonical blocks plus missing local template bindings.
     fixes for supported missing-prop and import scenarios.
 20. Workspace symbols expose `.kpa` components plus exported script bindings.
 21. The repository-local CLI can invoke the same diagnostics core on direct
-    `.kpa` file or folder targets.
+    `.kpa` file or folder targets, excluding editor-only legacy missing-binding warnings.
 22. Missing local template-visible bindings in canonical `{...}` expressions
     produce warning diagnostics for supported identifier references.
 23. Malformed canonical block structure produces warning diagnostics.

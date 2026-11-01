@@ -36,6 +36,8 @@ Important consequences:
 - a tag push is the technical release trigger
 - the tag version must exactly match `package.json`
 - the tag must point to a commit that is already on `main`
+- the workflow fetches `main` without truncating ancestry, including when main
+  advances beyond the tagged commit
 - the published artifact is the validated `.vsix`, not the raw repository tree
 - after a successful release, `main` should be merged back into `develop`
 
@@ -53,15 +55,32 @@ Before cutting a release, ensure all of the following are true:
 - `CHANGELOG.md` contains the corresponding release notes
 - `package-lock.json` is up to date
 - the release content has been reviewed
-- the repository secret `VSCE_PAT` is configured for marketplace publishing
+- the Marketplace publisher `koppajs` has a Trusted Publishing policy matching this GitHub repository and `release.yml`
 
 Tooling expectations for local verification:
 
-- Node.js >= 22
+- Node.js `^22.22.1 || ^24.0.0 || >=26.0.0`
 - npm 10 or newer
 
 The hosted release workflow uses the maintainer default from `.nvmrc`, which
-currently stays on Node 22.
+currently stays on Node 22.22.1.
+
+## Marketplace Authentication
+
+Marketplace publishing uses GitHub Actions OIDC Trusted Publishing, not a stored PAT. In the [publisher management page](https://marketplace.visualstudio.com/manage), open publisher `koppajs`, select **Trusted Publishing**, and create a policy with:
+
+| Field            | Value                                                  |
+| ---------------- | ------------------------------------------------------ |
+| Repository owner | `koppajs`                                              |
+| Repository       | `koppajs-vscode-extension`                             |
+| Workflow         | `release.yml` (filename only)                          |
+| Environment      | Empty; this workflow does not use a GitHub environment |
+
+The publishing job grants `contents: write` for GitHub release operations and `id-token: write` for OIDC. The final step runs `vsce publish --packagePath .local/release/*.vsix --oidc`, publishing the validated artifact without rebuilding it. The built-in `github.token` remains scoped to GitHub release commands; it is not used for Marketplace authentication. No `VSCE_PAT` secret or Azure DevOps organization is required for this authentication path.
+
+Keep the policy aligned if the repository, workflow filename or environment changes. For private repositories, run the configured workflow within 48 hours after policy creation, as required by Microsoft. An active policy alone does not prove successful token exchange; confirm the Marketplace publish step during an authorized release run.
+
+See [the official publishing guide](https://code.visualstudio.com/api/working-with-extensions/publishing-extension#publish-with-github-actions-and-trusted-publishing) and [the release publishing spec](docs/specs/release-publishing.md).
 
 ## Local Validation Before Branching
 
@@ -80,7 +99,23 @@ Why this matters:
 - the release workflow runs the same validation gate again in CI
 - failing locally is cheaper than failing after tagging
 - `npm run release:check` verifies that the extension packages cleanly into a
-  `.vsix`
+  `.vsix`, then runs the editor integration suite against the minified release bundles
+
+### Archive and Release-Host Contract
+
+`npm run release:check` delegates the entire sequence to `scripts/check-release-package.mjs`: package with `vsce`, inspect the actual VSIX ZIP, run `npm run test:integration:release`, then repeat archive/workspace verification. The host invocation belongs inside the script between the archive checks, not in an external `&&` chain. ZIP reading reuses `yauzl` already installed by `@vscode/vsce`; no dependencies are added or changed.
+
+Required archive entries and metadata:
+
+- `extension/dist/extension.js` and `extension/dist/language-server.js`
+- `extension/dist/package.json` with `type: "commonjs"`
+- `extension/package.json` with `main: "./dist/extension.js"` and the ESM root `type: "module"`
+
+Reject `.diffuno`, `node_modules`, `src`, `out`, `test`, `tests`, and `scripts` directories, source files such as `.ts`/`.tsx`, and source maps (`.map`). A non-empty archive or a packaging file list alone does not satisfy this contract.
+
+Compare workspace `dist/extension.js`, `dist/language-server.js`, and `dist/package.json` byte-for-byte with their archived counterparts before and after the release-host tests. Do not replace these minified artifacts with development builds during the sequence.
+
+The release tests still use the workspace Extension Development Host; they neither install nor load the VSIX. Byte equality connects the host's workspace artifacts to the archive, but does not establish clean-install behavior, independence from workspace files, or Marketplace installation success.
 
 The generated release artifact is written to:
 

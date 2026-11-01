@@ -12,6 +12,36 @@ not every internal refactor.
 
 ## [Unreleased]
 
+No unreleased changes.
+
+## [1.1.0]
+
+- Include the original KoppaJS icon as the Marketplace extension icon and verify
+  its manifest reference and byte-identical VSIX inclusion.
+
+- Bound unit-test concurrency for TypeScript-service and CLI regression suites.
+- Preserve full main-branch ancestry when validating release tags.
+
+- Exclude local `.diffuno` workspace metadata from the VSIX and reject it in archive regression tests.
+- Consume English language-core/check 0.2.2 with server 0.2.1 resolving Core 0.2.2; preserve identifiers and user-authored Unicode values.
+
+- Standardize extension text, HTML completion descriptions, diagnostics, quick fixes, logs, examples, and repository CLI output on English. Adapt known shared-package messages at the presentation boundary without changing diagnostics, snippets, or user content.
+
+- Add safe required-slot insertion and unknown-emit-handler removal, with real editor application and diagnostic-cleanup tests. Use the published language-core 0.2.1 fixes for paired default slots and isolated Prop assignment checks.
+- Remove duplicate HTML/component and document-symbol providers; route legacy, reference/rename, code-action and empty-window workspace-symbol requests to one explicit owner.
+- Require syntax and language configuration assets in the VSIX and verify their byte identity alongside the tested release bundles.
+
+- Validate the generated VSIX ZIP for required bundles, CommonJS metadata and forbidden payloads; verify packaged runtime bytes match the workspace before and after release-host tests. The host tests do not install the archive.
+
+- Resolve the reviewed npm audit findings with tested, version-scoped security dependencies; reproducibly adapt the two client glob checks to minimatch 11 during installation. File-operation filters adopt Bash-style negative extglob suffix matching and Unicode case folding for case-insensitive patterns.
+
+- Update dependencies to the latest compatible releases, including KoppaJS language-core/check 0.2.2 and server 0.2.1, language client/server 11, ESLint 10, Vitest 5, Vite 8, and Webpack CLI 7.
+- Raise the supported baseline to Node.js `^22.22.1 || ^24.0.0 || >=26.0.0` and VS Code 1.144.0, aligning editor API types with the supported host.
+- Adopt TypeScript 6.0.3 with Node16 module resolution and an explicit CommonJS source scope; retain Node 22 API types and defer TypeScript 7 until the parser and shared language packages support it.
+- Fix local editor adapters overriding current `{{...}}` runtime interpolations: defer their binding diagnostics and expression intelligence to the shared language server while preserving legacy single-brace behavior.
+- Preserve statically detectable activation exports in minified release bundles for the current VS Code ESM loader, and run the editor suite against release bundles in `release:check`.
+- Add a production-build and CLI compatibility check using Core 3.0.12, Router 0.1.9, and Vite plugin 2.0.1 as development-only dependencies.
+
 - Raised the repository Node.js baseline to `>=22` and expanded CI validation to Node.js 22 and 24.
 - Fixed the shared CLI smoke test integration, hardened VS Code integration-test packaging for ESM repositories, and added release `.vsix` validation plus a tag-driven release workflow.
 

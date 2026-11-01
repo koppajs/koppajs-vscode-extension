@@ -33,31 +33,31 @@ export const kpaBlockSnippets: ReadonlyArray<{
   {
     label: canonicalTemplateBlock,
     snippet: '[template]\n\t$0\n[/template]',
-    documentation: 'Fuegt einen Koppa Template-Block ein.',
+    documentation: 'Inserts a Koppa Template block.',
   },
   {
     label: 'ts',
     snippet: '[ts]\n\t$0\n[/ts]',
-    documentation: 'Fuegt einen Koppa TS-Block ein.',
+    documentation: 'Inserts a Koppa TS block.',
   },
   {
     label: 'js',
     snippet: '[js]\n\t$0\n[/js]',
-    documentation: 'Fuegt einen Koppa JS-Block ein.',
+    documentation: 'Inserts a Koppa JS block.',
   },
   {
     label: 'css',
     snippet: '[css]\n\t$0\n[/css]',
-    documentation: 'Fuegt einen Koppa CSS-Block ein.',
+    documentation: 'Inserts a Koppa CSS block.',
   },
   {
     label: 'sass',
     snippet: '[sass]\n\t$0\n[/sass]',
-    documentation: 'Fuegt einen Koppa SASS-Block ein.',
+    documentation: 'Inserts a Koppa SASS block.',
   },
   {
     label: 'scss',
     snippet: '[scss]\n\t$0\n[/scss]',
-    documentation: 'Fuegt einen Koppa SCSS-Block ein.',
+    documentation: 'Inserts a Koppa SCSS block.',
   },
 ];

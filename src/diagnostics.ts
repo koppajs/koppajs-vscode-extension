@@ -17,7 +17,7 @@ export function updateDiagnostics(document: vscode.TextDocument): void {
     document.uri.scheme === 'file' ? document.uri.fsPath : undefined,
   )
     .filter(
-      ({ code, message }) => code === undefined && message.startsWith('Lokales Template-Symbol ['),
+      ({ code, message }) => code === undefined && message.startsWith('Local template symbol ['),
     )
     .map(({ code, data, message, range }) => {
       const diagnostic = new vscode.Diagnostic(

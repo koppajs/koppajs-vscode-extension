@@ -69,7 +69,7 @@ The local pre-commit hook runs the same guard and blocks the commit when the con
 
 ## Requirements
 
-- Node.js >= 22 (`.nvmrc` defaults to `22`)
+- Node.js `^22.22.1 || ^24.0.0 || >=26.0.0` (`.nvmrc` defaults to `22.22.1`)
 - npm >= 10
 
 Install dependencies:
@@ -98,6 +98,9 @@ Repository-specific focus for this project:
 
 - Keep the extension a thin editor adapter over the shared KoppaJS language packages.
 - Align editor contributions, diagnostics behavior, quick fixes, and docs in the same change.
+- Run `npm run test:ecosystem` when updating KoppaJS packages; Core, Router, and the Vite plugin are development-only compatibility dependencies.
+- Run `npm run release:check` to inspect the actual VSIX payload and test byte-identical minified workspace bundles in the editor host. This does not install the archive; runtime files are compared before and after host tests.
+- Keep install lifecycle scripts enabled: `postinstall` applies the version- and hash-guarded language-client adaptation for minimatch 11. After an intentional `--ignore-scripts` install, run `node scripts/prepare-languageclient.mjs` before building. Review the scoped security overrides and run both full and production-only `npm audit` checks when updating their owners.
 
 <p align="right">(<a href="#contributing-top">back to top</a>)</p>
 
@@ -112,6 +115,7 @@ Expectations for changes in this repository:
 - keep implementations explicit and easy to review
 - prefer updating governing docs over leaving intent implicit
 - keep quality-gate commands passing before asking for review
+- maintain lint rules in `eslint.config.mjs` (ESLint 10 flat configuration)
 - do not silently change public behavior or contributor workflow
 
 <p align="right">(<a href="#contributing-top">back to top</a>)</p>
@@ -171,6 +175,8 @@ That means:
 Release and packaging expectations remain documented in `CHANGELOG.md`, `ROADMAP.md`, `RELEASE.md`, and the repository workflows.
 
 When a release changes the public contract, update `CHANGELOG.md`, the relevant specs, and the governed root documents together.
+
+Marketplace publishing uses GitHub Actions OIDC Trusted Publishing, without a Marketplace PAT. Keep the publisher policy aligned with `koppajs/koppajs-vscode-extension`, workflow filename `release.yml`, and no environment; setup and verification are documented in `RELEASE.md`.
 
 <p align="right">(<a href="#contributing-top">back to top</a>)</p>
 

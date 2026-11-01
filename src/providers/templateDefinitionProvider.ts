@@ -1,6 +1,5 @@
 import * as vscode from 'vscode';
 import { collectLocalScriptSymbols } from '../language/symbols';
-import { resolveCanonicalTemplateComponentAtOffset } from '../language/templateComponents';
 import {
   createTemplateSemanticVirtualFileName,
   getTemplateSemanticDefinitions,
@@ -23,22 +22,9 @@ export function registerTemplateDefinitionProvider(context: vscode.ExtensionCont
       }
 
       const sourcePath = document.uri.scheme === 'file' ? document.uri.fsPath : undefined;
-      const componentReference = resolveCanonicalTemplateComponentAtOffset(
-        templateContext.document,
-        sourcePath,
-        offset,
-      );
-
-      if (componentReference?.component.resolvedFilePath) {
-        return new vscode.Location(
-          vscode.Uri.file(componentReference.component.resolvedFilePath),
-          new vscode.Position(0, 0),
-        );
-      }
-
       const templateExpressionContext = getTemplateExpressionContext(text, offset, templateContext);
 
-      if (!templateExpressionContext) {
+      if (!templateExpressionContext || templateExpressionContext.isRuntimeExpression) {
         return undefined;
       }
 

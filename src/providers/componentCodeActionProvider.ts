@@ -1,5 +1,11 @@
+import {
+  collectCanonicalTemplateComponentDiagnostics,
+  parseKpaDocument as parseSharedDocument,
+} from '@koppajs/koppajs-language-core';
 import ts from 'typescript';
 import * as vscode from 'vscode';
+import { createComponentQuickFix } from '../language/componentQuickFixes';
+import { toKebabCase } from '../language/templateComponents';
 import type { KpaBlockNode } from '../language/ast';
 import {
   kpaDiagnosticCodes,
@@ -20,10 +26,54 @@ export function registerComponentCodeActionProvider(context: vscode.ExtensionCon
     {
       async provideCodeActions(document, _range, codeActionContext) {
         const actions: vscode.CodeAction[] = [];
+        const text = document.getText();
+        const currentDiagnostics = codeActionContext.diagnostics.some(
+          (diagnostic) =>
+            diagnostic.source === 'koppa-diagnostics' &&
+            (diagnostic.code === kpaDiagnosticCodes.missingComponentSlot ||
+              diagnostic.code === kpaDiagnosticCodes.unknownComponentEmit),
+        )
+          ? collectCanonicalTemplateComponentDiagnostics(
+              parseSharedDocument(text),
+              document.uri.scheme === 'file' ? document.uri.fsPath : undefined,
+            )
+          : [];
 
         for (const diagnostic of codeActionContext.diagnostics) {
           if (diagnostic.source !== 'koppa-diagnostics') {
             continue;
+          }
+
+          if (diagnostic.range.start.line === diagnostic.range.end.line) {
+            const fix = createComponentQuickFix(
+              text,
+              {
+                code: typeof diagnostic.code === 'object' ? diagnostic.code.value : diagnostic.code,
+                source: diagnostic.source,
+                message: diagnostic.message,
+                range: {
+                  line: diagnostic.range.start.line,
+                  startChar: diagnostic.range.start.character,
+                  endChar: diagnostic.range.end.character,
+                },
+              },
+              currentDiagnostics,
+            );
+            if (fix) {
+              const action = new vscode.CodeAction(fix.title, vscode.CodeActionKind.QuickFix);
+              const edit = new vscode.WorkspaceEdit();
+              edit.replace(
+                document.uri,
+                new vscode.Range(
+                  document.positionAt(fix.startOffset),
+                  document.positionAt(fix.endOffset),
+                ),
+                fix.newText,
+              );
+              action.edit = edit;
+              action.diagnostics = [diagnostic];
+              actions.push(action);
+            }
           }
 
           if (diagnostic.code === kpaDiagnosticCodes.missingComponentProp) {
@@ -31,8 +81,7 @@ export function registerComponentCodeActionProvider(context: vscode.ExtensionCon
               document,
               diagnostic,
               (diagnostic as vscode.Diagnostic & { data?: unknown }).data as
-                | MissingComponentPropDiagnosticData
-                | undefined,
+                MissingComponentPropDiagnosticData | undefined,
             );
 
             if (action) {
@@ -45,8 +94,7 @@ export function registerComponentCodeActionProvider(context: vscode.ExtensionCon
               document,
               diagnostic,
               (diagnostic as vscode.Diagnostic & { data?: unknown }).data as
-                | UnresolvedComponentTagDiagnosticData
-                | undefined,
+                UnresolvedComponentTagDiagnosticData | undefined,
             );
 
             if (action) {
@@ -76,7 +124,7 @@ function createMissingPropCodeAction(
   }
 
   const action = new vscode.CodeAction(
-    `Prop [${data.propName}] fuer [${data.componentName}] ergaenzen`,
+    `Add prop [${data.propName}] for [${data.componentName}]`,
     vscode.CodeActionKind.QuickFix,
   );
   const edit = new vscode.WorkspaceEdit();
@@ -84,7 +132,7 @@ function createMissingPropCodeAction(
   edit.insert(
     document.uri,
     document.positionAt(data.insertOffset),
-    ` ${data.propName}={${createPropPlaceholder(data.propTypeText)}}`,
+    ` :${toKebabCase(data.propName)}="${createPropPlaceholder(data.propTypeText)}"`,
   );
 
   action.diagnostics = [diagnostic];
@@ -109,7 +157,7 @@ async function createImportComponentCodeAction(
   }
 
   const action = new vscode.CodeAction(
-    `Komponente [${data.componentName}] importieren`,
+    `Import component [${data.componentName}]`,
     vscode.CodeActionKind.QuickFix,
   );
   const edit = new vscode.WorkspaceEdit();
@@ -170,7 +218,7 @@ function createPropPlaceholder(typeText: string | undefined): string {
   const normalizedTypeText = typeText?.replace(/\s+/g, '') ?? '';
 
   if (normalizedTypeText.includes('string') || /'[^']*'|"[^"]*"/.test(typeText ?? '')) {
-    return '""';
+    return "''";
   }
 
   if (normalizedTypeText.includes('number')) {

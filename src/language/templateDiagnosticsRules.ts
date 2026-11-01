@@ -54,7 +54,7 @@ export function collectTemplateDiagnosticsFromDocument(
           startChar: reference.range.start.character,
           endChar: reference.range.end.character,
         },
-        message: `Lokales Template-Symbol [${reference.name}] wurde nicht gefunden.`,
+        message: `Local template symbol [${reference.name}] was not found.`,
       },
     ];
   });

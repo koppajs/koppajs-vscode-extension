@@ -24,4 +24,6 @@ Use the local spec template when one exists.
 
 - `TEMPLATE.md`
 - `kpa-editing-core.md`
+- `dependency-compatibility.md`
+- `release-publishing.md`
 - `repository-documentation-contract.md`

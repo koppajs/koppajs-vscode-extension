@@ -14,7 +14,7 @@ function createNodeConfig({ entry, externals = {}, filename, outputPath }) {
     output: {
       path: outputPath,
       filename,
-      libraryTarget: 'commonjs2',
+      libraryTarget: 'commonjs-static',
     },
     externals,
     resolve: {
@@ -28,6 +28,12 @@ function createNodeConfig({ entry, externals = {}, filename, outputPath }) {
           use: [
             {
               loader: 'ts-loader',
+              options: {
+                compilerOptions: {
+                  module: 'ESNext',
+                  moduleResolution: 'Bundler',
+                },
+              },
             },
           ],
         },

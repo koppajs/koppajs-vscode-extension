@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import { isLocalSymbolRequest } from './providerOwnership';
 import {
   collectLocalReferenceRangesForSymbols,
   resolveLocalSymbolOccurrenceAtOffset,
@@ -21,6 +22,10 @@ import { collectWorkspaceResolvedComponentUsages } from './workspaceComponentSup
 export function registerLocalReferencesProvider(context: vscode.ExtensionContext) {
   const provider = vscode.languages.registerReferenceProvider('kpa', {
     async provideReferences(document, position, referenceContext) {
+      if (!isLocalSymbolRequest(document.getText(), document.offsetAt(position))) {
+        return undefined;
+      }
+
       const kpaDocument = parseKpaDocument(document.getText());
       const sourcePath = document.uri.scheme === 'file' ? document.uri.fsPath : undefined;
       const componentReference = resolveCanonicalTemplateComponentAtOffset(

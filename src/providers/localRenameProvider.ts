@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import { isLocalSymbolRequest } from './providerOwnership';
 import type { KpaDocument, KpaLocatedRange } from '../language/ast';
 import {
   collectLocalReferenceRangesForSymbols,
@@ -24,6 +25,10 @@ import { collectWorkspaceResolvedComponentUsages } from './workspaceComponentSup
 export function registerLocalRenameProvider(context: vscode.ExtensionContext) {
   const provider = vscode.languages.registerRenameProvider('kpa', {
     async provideRenameEdits(document, position, newName) {
+      if (!isLocalSymbolRequest(document.getText(), document.offsetAt(position))) {
+        return undefined;
+      }
+
       const kpaDocument = parseKpaDocument(document.getText());
       const sourcePath = document.uri.scheme === 'file' ? document.uri.fsPath : undefined;
       const componentReference = resolveCanonicalTemplateComponentAtOffset(
@@ -99,7 +104,7 @@ export function registerLocalRenameProvider(context: vscode.ExtensionContext) {
 
       if (occurrence.symbols.length > 1) {
         throw new Error(
-          `Template symbol [${occurrence.symbols[0].name}] ist mehrdeutig und kann nicht sicher umbenannt werden.`,
+          `Template symbol [${occurrence.symbols[0].name}] is ambiguous and cannot be safely renamed.`,
         );
       }
 
@@ -113,6 +118,10 @@ export function registerLocalRenameProvider(context: vscode.ExtensionContext) {
     },
 
     prepareRename(document, position) {
+      if (!isLocalSymbolRequest(document.getText(), document.offsetAt(position))) {
+        return undefined;
+      }
+
       const kpaDocument = parseKpaDocument(document.getText());
       const sourcePath = document.uri.scheme === 'file' ? document.uri.fsPath : undefined;
       const componentReference = resolveCanonicalTemplateComponentAtOffset(
@@ -163,7 +172,7 @@ export function registerLocalRenameProvider(context: vscode.ExtensionContext) {
 
       if (occurrence.symbols.length > 1) {
         throw new Error(
-          `Template symbol [${occurrence.symbols[0].name}] ist mehrdeutig und kann nicht sicher umbenannt werden.`,
+          `Template symbol [${occurrence.symbols[0].name}] is ambiguous and cannot be safely renamed.`,
         );
       }
 

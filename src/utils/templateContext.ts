@@ -10,6 +10,7 @@ export interface CanonicalTemplateContext {
 }
 
 export interface TemplateExpressionContext extends CanonicalTemplateContext {
+  isRuntimeExpression: boolean;
   expressionRange: {
     startOffset: number;
     endOffset: number;
@@ -53,6 +54,7 @@ export function getTemplateExpressionContext(
 
   return {
     ...templateContext,
+    isRuntimeExpression: expression.text.startsWith('{{'),
     expressionRange: {
       startOffset: expression.range.start.offset,
       endOffset: expression.range.end.offset,

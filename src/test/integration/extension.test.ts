@@ -157,6 +157,55 @@ suite('Extension integration', function () {
     await waitForExtensionActivation();
   });
 
+  test('uses the shared runtime contract for double-brace diagnostics and completions', async () => {
+    const fixturePath = path.join(
+      getExtension().extensionPath,
+      'src/test/fixtures/ecosystem/counter-page.kpa',
+    );
+    const validText = fs
+      .readFileSync(fixturePath, 'utf8')
+      .replace('[js]', '[js]\n  const ecosystemPrivate = 1;');
+    const invalidText = validText.replace('{{title}}', '{{ecosystemMissing}}');
+    const document = await vscode.workspace.openTextDocument({
+      language: 'kpa',
+      content: invalidText,
+    });
+    const editor = await vscode.window.showTextDocument(document);
+    await waitForExtensionActivation();
+
+    const invalidDiagnostics = await waitForKpaDiagnostics(document, 1);
+    assert.strictEqual(invalidDiagnostics.length, 1);
+    assert.ok(invalidDiagnostics[0].message.includes('ecosystemMissing'));
+
+    await editor.edit((edit) => {
+      edit.replace(
+        new vscode.Range(document.positionAt(0), document.positionAt(document.getText().length)),
+        validText,
+      );
+    });
+    const diagnostics = await waitForKpaDiagnostics(document, 0);
+    assert.strictEqual(
+      diagnostics.length,
+      0,
+      'Returned controller properties must not trigger local missing-binding warnings.',
+    );
+
+    const position = document.positionAt(validText.indexOf('{{title}}') + 2);
+    const completions = await vscode.commands.executeCommand<vscode.CompletionList>(
+      'vscode.executeCompletionItemProvider',
+      document.uri,
+      position,
+    );
+    const labels = getCompletionLabels(completions);
+    for (const name of ['title', 'count', 'formatCount']) {
+      assert.ok(labels.includes(name), `Returned controller binding ${name} must be completed.`);
+    }
+    assert.ok(
+      !labels.includes('ecosystemPrivate'),
+      'Private controller locals must not leak through the legacy completion provider.',
+    );
+  });
+
   test('offers block snippets outside existing Koppa blocks', async () => {
     const document = await vscode.workspace.openTextDocument({
       content: '',
@@ -191,7 +240,32 @@ suite('Extension integration', function () {
     );
 
     assert.ok(completions);
-    assert.ok(completions.items.some((item) => item.label === 'div'));
+    assert.strictEqual(completions.items.filter((item) => item.label === 'div').length, 1);
+    assert.strictEqual(
+      completions.items.find((item) => item.label === 'div')?.documentation,
+      'A container element without special meaning.',
+    );
+  });
+
+  test('presents server HTML attribute documentation in English', async () => {
+    const document = await vscode.workspace.openTextDocument({
+      content: '[template]\n<div >\n[/template]',
+      language: 'kpa',
+    });
+    await vscode.window.showTextDocument(document);
+    await waitForExtensionActivation();
+    const completions = await vscode.commands.executeCommand<vscode.CompletionList>(
+      'vscode.executeCompletionItemProvider',
+      document.uri,
+      new vscode.Position(1, 5),
+      ' ',
+    );
+    assert.ok(completions);
+    assert.strictEqual(completions.items.filter((item) => item.label === 'class').length, 1);
+    assert.strictEqual(
+      completions.items.find((item) => item.label === 'class')?.documentation,
+      'Defines one or more classes for an element (CSS styling).',
+    );
   });
 
   test('offers imported .kpa components as canonical template tag completions', async () => {
@@ -225,8 +299,8 @@ suite('Extension integration', function () {
     );
     const labels = getCompletionLabels(completions);
 
-    assert.ok(labels.includes('UserCard'));
-    assert.ok(labels.includes('user-card'));
+    assert.strictEqual(labels.filter((label) => label === 'UserCard').length, 1);
+    assert.strictEqual(labels.filter((label) => label === 'user-card').length, 1);
   });
 
   test('offers imported component props as attribute completions inside canonical template tags', async () => {
@@ -273,8 +347,8 @@ suite('Extension integration', function () {
     );
     const labels = getCompletionLabels(completions);
 
-    assert.ok(labels.includes('title'));
-    assert.ok(labels.includes('count'));
+    assert.strictEqual(labels.filter((label) => label === 'title').length, 1);
+    assert.strictEqual(labels.filter((label) => label === 'count').length, 1);
   });
 
   test('offers local script symbol completions inside canonical template expressions', async () => {
@@ -347,7 +421,7 @@ suite('Extension integration', function () {
     const diagnostics = await waitForKpaDiagnostics(document, 1);
 
     assert.strictEqual(diagnostics.length, 1);
-    assert.ok(diagnostics[0].message.includes('Lokales Template-Symbol [missing]'));
+    assert.ok(diagnostics[0].message.includes('Local template symbol [missing]'));
   });
 
   test('does not offer HTML attribute completions inside template expressions in opening tags', async () => {
@@ -727,19 +801,183 @@ suite('Extension integration', function () {
     );
     const titles = getCodeActionTitles(actions);
 
-    assert.ok(titles.some((title) => title.includes('Prop [title]')));
+    assert.strictEqual(
+      titles.filter((title) => title.includes('Add prop [title] for [UserCard]')).length,
+      1,
+    );
 
     const propAction = actions?.find((action) => {
-      if (!isCodeAction(action) || !action.edit || !action.title.includes('Prop [title]')) {
+      if (
+        !isCodeAction(action) ||
+        !action.edit ||
+        !action.title.includes('Add prop [title] for [UserCard]')
+      ) {
         return false;
       }
 
-      return getWorkspaceEditTexts(action.edit, document).some((text) => text.includes('title={'));
+      return getWorkspaceEditTexts(action.edit, document).some((text) => text.includes(':title="'));
     });
     assert.ok(propAction && isCodeAction(propAction) && propAction.edit);
 
     const editTexts = getWorkspaceEditTexts(propAction.edit, document);
-    assert.ok(editTexts.some((text) => text.includes('title={')));
+    assert.ok(editTexts.some((text) => text.includes(':title="')));
+    assert.strictEqual(await vscode.workspace.applyEdit(propAction.edit), true);
+    await document.save();
+    assert.strictEqual((await waitForKpaDiagnostics(document, 0)).length, 0);
+  });
+
+  for (const markup of ['<UserCard><p>Existing body</p></UserCard>', '<UserCard />']) {
+    test(`repairs missing required component slots in ${markup}`, async () => {
+      const directory = await createWorkspaceTempDir('kpa-component-slot-fix');
+      const componentPath = path.join(directory, 'UserCard.kpa');
+      const pagePath = path.join(directory, 'Page.kpa');
+      fs.writeFileSync(
+        componentPath,
+        '[template]<div></div>[/template]\n[ts]\ninterface Slots { header: unknown; }\n[/ts]',
+      );
+      const source = `[template]\n  ${markup}\n[/template]\n[ts]\nimport UserCard from './UserCard';\n[/ts]\n`;
+      fs.writeFileSync(pagePath, source);
+      const document = await vscode.workspace.openTextDocument(vscode.Uri.file(pagePath));
+      await vscode.window.showTextDocument(document);
+      await waitForExtensionActivation();
+      const diagnostics = await waitForKpaDiagnostics(document, 1);
+      const missingSlot = diagnostics.find((entry) => entry.code === 'kpa.missing-component-slot');
+      assert.ok(missingSlot, 'The real language server must report the missing slot.');
+      const actions = await vscode.commands.executeCommand<
+        Array<vscode.CodeAction | vscode.Command>
+      >('vscode.executeCodeActionProvider', document.uri, missingSlot.range);
+      const slotActions = actions?.filter(
+        (action) =>
+          isCodeAction(action) &&
+          action.edit &&
+          action.title === 'Add slot [header] for [UserCard]',
+      );
+      assert.strictEqual(slotActions?.length, 1, 'Offer exactly one safe slot repair.');
+      const action = slotActions?.[0];
+      assert.ok(action && isCodeAction(action) && action.edit);
+      assert.strictEqual(await vscode.workspace.applyEdit(action.edit), true);
+      await document.save();
+      const remaining = await waitForKpaDiagnostics(document, 0);
+      assert.strictEqual(remaining.length, 0, 'Applying the slot repair must clear diagnostics.');
+      assert.ok(document.getText().includes("import UserCard from './UserCard';"));
+      if (markup.includes('Existing body')) {
+        assert.ok(document.getText().includes('<p>Existing body</p>'));
+      }
+    });
+  }
+
+  for (const markup of ['<UserCard />', '<UserCard></UserCard>', '<UserCard>  </UserCard>']) {
+    test(`repairs a missing required default component slot in ${markup}`, async () => {
+      const directory = await createWorkspaceTempDir('kpa-component-default-slot-fix');
+      const pagePath = path.join(directory, 'Page.kpa');
+      fs.writeFileSync(
+        path.join(directory, 'UserCard.kpa'),
+        '[template]<div></div>[/template]\n[ts]\ninterface Slots { default: unknown; }\n[/ts]',
+      );
+      fs.writeFileSync(
+        pagePath,
+        `[template]${markup}[/template]\n[ts]\nimport UserCard from './UserCard';\n[/ts]\n`,
+      );
+      const document = await vscode.workspace.openTextDocument(vscode.Uri.file(pagePath));
+      await vscode.window.showTextDocument(document);
+      await waitForExtensionActivation();
+      const diagnostics = await waitForKpaDiagnostics(document, 1);
+      const diagnostic = diagnostics.find((entry) => entry.code === 'kpa.missing-component-slot');
+      assert.ok(diagnostic);
+      const actions = await vscode.commands.executeCommand<
+        Array<vscode.CodeAction | vscode.Command>
+      >('vscode.executeCodeActionProvider', document.uri, diagnostic.range);
+      const action = actions?.find(
+        (entry) =>
+          isCodeAction(entry) && entry.edit && entry.title === 'Add slot [default] for [UserCard]',
+      );
+      assert.ok(action && isCodeAction(action) && action.edit);
+      assert.strictEqual(await vscode.workspace.applyEdit(action.edit), true);
+      await document.save();
+      assert.strictEqual((await waitForKpaDiagnostics(document, 0)).length, 0);
+    });
+  }
+
+  test('removes unknown component emit bindings without changing other attributes', async () => {
+    const directory = await createWorkspaceTempDir('kpa-component-emit-fix');
+    const pagePath = path.join(directory, 'Page.kpa');
+    fs.writeFileSync(
+      path.join(directory, 'UserCard.kpa'),
+      '[template]<div></div>[/template]\n[ts]\ntype Emits = { save: [id: number] };\n[/ts]',
+    );
+    fs.writeFileSync(
+      pagePath,
+      '[template]\n  <UserCard class="keep" @close={handleClose}><p>Body</p></UserCard>\n[/template]\n[ts]\nimport UserCard from \'./UserCard\';\nconst handleClose = () => {};\n[/ts]\n',
+    );
+    const document = await vscode.workspace.openTextDocument(vscode.Uri.file(pagePath));
+    await vscode.window.showTextDocument(document);
+    await waitForExtensionActivation();
+    const diagnostics = await waitForKpaDiagnostics(document, 1);
+    const diagnostic = diagnostics.find((entry) => entry.code === 'kpa.unknown-component-emit');
+    assert.ok(diagnostic, 'The real server must identify the unknown emit.');
+    const actions = await vscode.commands.executeCommand<Array<vscode.CodeAction | vscode.Command>>(
+      'vscode.executeCodeActionProvider',
+      document.uri,
+      diagnostic.range,
+    );
+    const fixes = actions?.filter(
+      (entry) =>
+        isCodeAction(entry) &&
+        entry.edit &&
+        entry.title === 'Remove event handler [@close] from [UserCard]',
+    );
+    assert.strictEqual(fixes?.length, 1, 'Offer one explicit removal, not a guessed rename.');
+    const action = fixes?.[0];
+    assert.ok(action && isCodeAction(action) && action.edit);
+    assert.strictEqual(await vscode.workspace.applyEdit(action.edit), true);
+    await document.save();
+    const text = document.getText();
+    assert.ok(!text.includes('@close='));
+    assert.ok(text.includes('class="keep"'));
+    assert.ok(text.includes('<p>Body</p>'));
+    assert.ok(text.includes('const handleClose = () => {};'));
+    assert.strictEqual((await waitForKpaDiagnostics(document, 0)).length, 0);
+  });
+
+  test('repairs multiple slot and emit diagnostics sequentially from fresh document state', async () => {
+    const directory = await createWorkspaceTempDir('kpa-component-sequential-fixes');
+    const pagePath = path.join(directory, 'Page.kpa');
+    fs.writeFileSync(
+      path.join(directory, 'Card.kpa'),
+      '[template]<div></div>[/template]\n[ts]\ninterface Slots { header: unknown; default: unknown; }\ntype Emits = { save: [id: number] };\n[/ts]',
+    );
+    fs.writeFileSync(
+      pagePath,
+      "[template]<Card @cancel={handleCancel} />[/template]\n[ts]\nimport Card from './Card';\nconst handleCancel = () => {};\n[/ts]\n",
+    );
+    const document = await vscode.workspace.openTextDocument(vscode.Uri.file(pagePath));
+    await vscode.window.showTextDocument(document);
+    await waitForExtensionActivation();
+    const stages = [
+      { message: 'Required slot [header]', title: 'Add slot [header] for [Card]' },
+      { message: 'Required slot [default]', title: 'Add slot [default] for [Card]' },
+      { message: 'Event handler [@cancel]', title: 'Remove event handler [@cancel] from [Card]' },
+    ];
+    for (let index = 0; index < stages.length; index++) {
+      const diagnostics = await waitForKpaDiagnostics(document, stages.length - index);
+      assert.strictEqual(diagnostics.length, stages.length - index);
+      const diagnostic = diagnostics.find((entry) => entry.message.includes(stages[index].message));
+      assert.ok(diagnostic, `Fresh diagnostic required for ${stages[index].message}`);
+      const actions = await vscode.commands.executeCommand<
+        Array<vscode.CodeAction | vscode.Command>
+      >('vscode.executeCodeActionProvider', document.uri, diagnostic.range);
+      const matches = actions?.filter(
+        (entry) => isCodeAction(entry) && entry.edit && entry.title.includes(stages[index].title),
+      );
+      assert.strictEqual(matches?.length, 1);
+      const action = matches?.[0];
+      assert.ok(action && isCodeAction(action) && action.edit);
+      assert.strictEqual(await vscode.workspace.applyEdit(action.edit), true);
+      await document.save();
+    }
+    assert.strictEqual((await waitForKpaDiagnostics(document, 0)).length, 0);
+    assert.ok(document.getText().includes('slot="header"'));
+    assert.ok(!document.getText().includes('@cancel='));
   });
 
   test('offers quick fixes to import unresolved workspace components', async () => {
@@ -762,10 +1000,13 @@ suite('Extension integration', function () {
     );
     const titles = getCodeActionTitles(actions);
 
-    assert.ok(titles.some((title) => title.includes('Komponente [UserCard] importieren')));
+    assert.strictEqual(
+      titles.filter((title) => title.includes('Import component [UserCard]')).length,
+      1,
+    );
 
     const importAction = actions?.find((action) =>
-      action.title.includes('Komponente [UserCard] importieren'),
+      action.title.includes('Import component [UserCard]'),
     );
     assert.ok(importAction && isCodeAction(importAction) && importAction.edit);
 
@@ -951,10 +1192,9 @@ suite('Extension integration', function () {
     >('vscode.executeDocumentSymbolProvider', document.uri);
     const symbolNames = flattenDocumentSymbolNames(symbols);
 
-    assert.ok(symbolNames.includes('[template]'));
-    assert.ok(symbolNames.includes('[ts]'));
-    assert.ok(symbolNames.includes('count'));
-    assert.ok(symbolNames.includes('increment'));
+    for (const name of ['[template]', '[ts]', 'count', 'increment']) {
+      assert.strictEqual(symbolNames.filter((entry) => entry === name).length, 1);
+    }
   });
 
   test('provides hover information for local script symbols inside canonical template expressions', async () => {
@@ -1094,12 +1334,10 @@ suite('Extension integration', function () {
     const diagnostics = await waitForKpaDiagnostics(document, 2);
     assert.strictEqual(diagnostics.length, 2);
     assert.ok(
-      diagnostics.some((diagnostic) =>
-        diagnostic.message.includes('Stattdessen [/css] verwendet.'),
-      ),
+      diagnostics.some((diagnostic) => diagnostic.message.includes('Found [/css] instead.')),
     );
     assert.ok(
-      diagnostics.some((diagnostic) => diagnostic.message.includes('Erwartet [/template].')),
+      diagnostics.some((diagnostic) => diagnostic.message.includes('Expected [/template].')),
     );
   });
 
@@ -1114,7 +1352,7 @@ suite('Extension integration', function () {
 
     assert.strictEqual(diagnostics.length, 1);
     assert.ok(
-      diagnostics[0].message.includes('Komponente [UserCard] wurde im [template]-Block verwendet'),
+      diagnostics[0].message.includes('Component [UserCard] was used in the [template] block'),
     );
   });
 
@@ -1136,6 +1374,6 @@ suite('Extension integration', function () {
     const diagnostics = await waitForKpaDiagnostics(document, 1);
 
     assert.strictEqual(diagnostics.length, 1);
-    assert.ok(diagnostics[0].message.includes('Lokales Template-Symbol [missing]'));
+    assert.ok(diagnostics[0].message.includes('Local template symbol [missing]'));
   });
 });
